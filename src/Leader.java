@@ -1,0 +1,56 @@
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Class representing shift leader that organizes miners and analyzes mine before mining starts.
+ * @author Nikol Caltova
+ */
+public class Leader {
+/*_________________________________________________CLASS_ATTRIBUTES___________________________________________________*/
+    private Mine assignedMine;
+    private String siteMapName;
+    private List<Worker> mineWorkers;
+/*___________________________________________________CONSTRUCTORS_____________________________________________________*/
+
+    /**
+     * Constructor, that creates instance of shift leader that is assigned a mine and name of the site map.
+     * @param siteMapName Name of the site map.
+     */
+    public Leader(String siteMapName, List<Worker> mineWorkers, Mine assignedMine) {
+        this.siteMapName = siteMapName;
+        this.assignedMine = assignedMine;
+        this.mineWorkers = mineWorkers;
+    }
+
+    /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
+
+    /**
+     * Method representing shift leader inspecting mining site for mining blocks.
+     * @throws FileNotFoundException If site map cannot be found.
+     */
+    public void inspectMiningSite() throws FileNotFoundException {
+        this.assignedMine.setWorkBlocks((ArrayList<WorkBlock>) Parser.parseIntoBlocks(siteMapName));
+    }
+
+    public void assignWork(WorkBlock designatedBlock){
+        Worker designatedWorker = findWorker();
+
+        if (designatedWorker != null) {
+            designatedWorker.setDone(false);
+            designatedWorker.setAssignedWorkBlock(designatedBlock);
+        }
+
+    }
+
+    private Worker findWorker(){
+
+        for (Worker worker: this.mineWorkers) {
+            if (worker.isDone()) return worker;
+        }
+        return null;
+    }
+
+/*______________________________________________________GETTERS_______________________________________________________*/
+
+}
