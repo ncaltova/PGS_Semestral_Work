@@ -23,6 +23,11 @@ public class Worker {
      */
     private boolean isDone;
 
+    /**
+     * Number of mined materials.
+     */
+    private int minedMaterial;
+
 /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     /**
@@ -36,6 +41,7 @@ public class Worker {
         this.workerTime = workerTime;
         this.isDone = false;
         this.assignedMine = assignedMine;
+        this.minedMaterial = assignedWorkBlock.getFieldCount();
     }
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
@@ -58,8 +64,12 @@ public class Worker {
      * Loading one mined field takes one second.
      */
     public void load() {
-        //wait for assignedWorkBlock.getFieldCount;
-        assignedMine.getCurrentLorry().load();
+
+        while (this.minedMaterial > 0){
+            //wait for assignedWorkBlock.getFieldCount;
+            assignedMine.getCurrentLorry().load();
+            this.minedMaterial--;
+        }
         this.isDone = true;
     }
 
@@ -70,7 +80,14 @@ public class Worker {
     public int generateTime() {
         Random rd = new Random();
 
-        return rd.nextInt(this.workerTime);
+        return rd.nextInt(this.workerTime) + 1;
+    }
+
+    /**
+     * Method representing worker sending lorry to ferry.
+     */
+    public void sentLorryAway(){
+        assignedMine.getCurrentLorry().goToFerry();
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/

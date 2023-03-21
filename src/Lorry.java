@@ -1,3 +1,4 @@
+import java.util.Random;
 
 public class Lorry {
 
@@ -24,10 +25,15 @@ public class Lorry {
      */
     private boolean isFull;
 
-   /**
-    * Ferry to which lorry brings loaded material.
-    */
-    private final Ferry assignedFerry;
+    /**
+     * Assigned mining site to be loaded at.
+     */
+    private Mine assignedMine;
+
+    /**
+     * Assigned dock with waiting ferry.
+     */
+    private Ferry assignedFerry;
 
     /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
@@ -36,31 +42,51 @@ public class Lorry {
      * with specified capacity, time it takes to get to ferry (and vice versa) and target ferry.
      * @param lorryCapacity Maximum capacity of lorry.
      * @param lorryTime Time it takes lorry to get to ferry (and vice versa).
-     * @param assignedFerry Target ferry.
      */
-    public Lorry(int lorryCapacity, int lorryTime, Ferry assignedFerry) {
+    public Lorry(int lorryCapacity, int lorryTime, Mine assignedMine, Ferry assignedFerry) {
         this.lorryCapacity = lorryCapacity;
         this.currentCapacity = lorryCapacity;
         this.lorryTime = lorryTime;
-        this.assignedFerry = assignedFerry;
         this.isFull = false;
+        this.assignedMine = assignedMine;
+        this.assignedFerry = assignedFerry;
     }
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
+    /**
+     * Method representing lorry going to dock with waiting ferry.
+     */
     public void goToFerry(){
         //wait for lorryTime
+        assignedMine.setCurrentLorry(null);
         //ferry.getTo
     }
 
+    /**
+     * Method generating time it takes
+     * lorry to get to dock with waiting ferry.
+     * @return Time it takes lorry to get to dock with waiting ferry.
+     */
     private int generateTime(){
-        return 0;
+        Random rd = new Random();
+
+        return rd.nextInt(this.lorryTime - 1) + 1;
     }
 
+    /**
+     * Methos representing loading lorry with one piece of mined material.
+     */
     public void load(){
         this.currentCapacity--;
-
         if (this.currentCapacity == 0) this.isFull = true;
+    }
+
+    /**
+     * Method representing lorry waiting in assigned mine to be loaded.
+     */
+    public void dockAtMine(){
+        assignedMine.setCurrentLorry(this);
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/

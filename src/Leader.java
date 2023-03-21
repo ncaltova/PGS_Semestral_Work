@@ -1,5 +1,4 @@
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,8 +7,20 @@ import java.util.List;
  */
 public class Leader {
 /*_________________________________________________CLASS_ATTRIBUTES___________________________________________________*/
+
+    /**
+     * Assigned mining site.
+     */
     private Mine assignedMine;
+
+    /**
+     * Mining site map for leader.
+     */
     private String siteMapName;
+
+    /**
+     * Workers answering to leader.
+     */
     private List<Worker> mineWorkers;
 /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
@@ -30,9 +41,13 @@ public class Leader {
      * @throws FileNotFoundException If site map cannot be found.
      */
     public void inspectMiningSite() throws FileNotFoundException {
-        this.assignedMine.setWorkBlocks((ArrayList<WorkBlock>) Parser.parseIntoBlocks(siteMapName));
+        this.assignedMine.setWorkBlocks(Parser.parseIntoBlocks(siteMapName));
     }
 
+    /**
+     * Method representing leader assigning work to assigned workers.
+     * @param designatedBlock Work block for leader to assign.
+     */
     public void assignWork(WorkBlock designatedBlock){
         Worker designatedWorker = findWorker();
 
@@ -43,6 +58,10 @@ public class Leader {
 
     }
 
+    /**
+     * Method representing leader finding free worker in assigned workers.
+     * @return Free worker in assigned workers.
+     */
     private Worker findWorker(){
 
         for (Worker worker: this.mineWorkers) {
