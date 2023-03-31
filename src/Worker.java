@@ -13,6 +13,7 @@ public class Worker extends Thread{
      * Mine where assigned workc block is located.
      */
     private Mine assignedMine;
+
     /**
      * Maximum time it takes worker to mine one field in work block.
      */
@@ -28,6 +29,18 @@ public class Worker extends Thread{
      */
     private int minedMaterial;
 
+    /**
+     * Current simulation time for this thread.
+     */
+    private int simTime;
+
+    /**
+     *
+     */
+    private Reporter reporter;
+
+
+
     /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     /**
@@ -35,12 +48,15 @@ public class Worker extends Thread{
      * @param assignedWorkBlock Work block assigned to worker.
      * @param workerTime Maximum speed to mine one field in work block for worker.
      */
-    public Worker(WorkBlock assignedWorkBlock, int workerTime, Mine assignedMine) {
+    public Worker(WorkBlock assignedWorkBlock, int workerTime, Mine assignedMine, int simTime, Reporter reporter) {
 
         this.assignedWorkBlock = assignedWorkBlock;
         this.workerTime = workerTime;
         this.assignedMine = assignedMine;
         this.minedMaterial = assignedWorkBlock.getFieldCount();
+        this.simTime = simTime;
+        this.reporter = reporter;
+
     }
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
@@ -58,10 +74,17 @@ public class Worker extends Thread{
      * Mining one block takes worker between zero (exlusive) and max mining time tWorker (inclusive).
      */
     public void mine() {
+        int mineTime = 0;
 
         while (!assignedWorkBlock.isEmpty()){
             assignedWorkBlock.mineField();
+            int currentTime = this.generateTime();
+            this.sleep(currentTime);
+            mineTime += currentTime;
         }
+
+        reporter.report("Simulation time: "+this.simTime+"ms, Role: Worker, Number of thread: "+this.getId()+", Message:" +
+                " Mining one work block done, final time: "+mineTime+"ms");
 
     }
 
@@ -77,6 +100,7 @@ public class Worker extends Thread{
 
            //Load one piece of mined material
            this.minedMaterial--;
+           this.sleep(10);
 
            //If current lorry is full, set it to ferry
            if (!assignedMine.loadLorry()) assignedMine.dispatchLorry();

@@ -1,4 +1,5 @@
 import java.util.Random;
+import java.util.concurrent.CyclicBarrier;
 
 public class Lorry extends Thread{
 
@@ -28,9 +29,12 @@ public class Lorry extends Thread{
     /**
      * Assigned dock with waiting ferry.
      */
-    private Ferry assignedFerry;
+    private CyclicBarrier assignedFerry;
 
-    private boolean isDispatched;
+    /**
+     * Current simulation time for this thread.
+     */
+    private int simTime;
 
     /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
@@ -40,28 +44,23 @@ public class Lorry extends Thread{
      * @param lorryCapacity Maximum capacity of lorry.
      * @param lorryTime Time it takes lorry to get to ferry (and vice versa).
      */
-    public Lorry(int lorryCapacity, int lorryTime, Ferry assignedFerry) {
+    public Lorry(int lorryCapacity, int lorryTime, CyclicBarrier assignedFerry) {
         this.lorryCapacity = lorryCapacity;
         this.currentCapacity = lorryCapacity;
         this.lorryTime = lorryTime;
         this.isFull = false;
         this.assignedFerry = assignedFerry;
-        this.isDispatched = false;
     }
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
-    /**
-     * Method representing lorry going to dock with waiting ferry.
-     */
-    public void goToFerry(){
-        //wait for generateFerryTime()
-        //assignedMine.setCurrentLorry(null);
-        assignedFerry.loadFerry(this);
-    }
-
-    public void getOffFerry(){
-        //wait for generateFinishTime()
+    @Override
+    public void run() {
+        int ferryTime = this.generateFerryTime();
+        this.sleep(ferryTime);
+        this.assignedFerry.await();
+        int finishTime = this.generateFinishTime();
+        this.sleep(finishTime);
     }
 
     /**
@@ -89,16 +88,9 @@ public class Lorry extends Thread{
     /**
      * Methos representing loading lorry with mined material.
      */
-    public void load(){
+    public synchronized void load(){
         this.currentCapacity--;
         if (this.currentCapacity == 0) this.isFull = true;
-    }
-
-    /**
-     * Method representing lorry waiting in assigned mine to be loaded.
-     */
-    public void dockAtMine(){
-        //assignedMine.setCurrentLorry(this);
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/
@@ -111,10 +103,6 @@ public class Lorry extends Thread{
         return isFull;
     }
 
-    public boolean isDispatched() {
-        return isDispatched;
-    }
-
-    /*______________________________________________________SETTERS_______________________________________________________*/
+/*______________________________________________________SETTERS_______________________________________________________*/
 
 }

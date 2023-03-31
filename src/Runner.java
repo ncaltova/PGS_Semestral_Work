@@ -1,3 +1,5 @@
+import java.util.concurrent.CyclicBarrier;
+
 public class Runner {
 
     public static void main(String[] args){
@@ -8,14 +10,16 @@ public class Runner {
         Reporter reporter = new Reporter(parameterCarrier.getOutputFile());
 
         //Initialization of mining site
-        Ferry ferry = new Ferry(parameterCarrier.getCapFerry());
+        CyclicBarrier ferry = new CyclicBarrier(parameterCarrier.getCapFerry());
         Lorry firstLorry = new Lorry(parameterCarrier.getCapLorry(), parameterCarrier.gettLorry(), ferry);
         MineDock dock = new MineDock(firstLorry);
         Mine mine = new Mine(dock);
-        Leader shiftLeader = new Leader(parameterCarrier.getInputFile(), mine);
+        Leader shiftLeader = new Leader(parameterCarrier.getInputFile(), mine, new InfoWorkers(parameterCarrier.gettWorker(),
+                parameterCarrier.getcWorker()), reporter);
 
         //Leader inspecting mining site
         shiftLeader.inspectMiningSite();
+
 
         //Initialization of mine workers
         shiftLeader.organizeWorkers();

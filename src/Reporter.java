@@ -28,7 +28,7 @@ public class Reporter {
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
-    public synchronized void report(String log, int timePassed) throws IOException {
+    public synchronized void report(String log) throws IOException {
         this.fileWriter.write(log);
         System.out.println(log);
     }

@@ -26,7 +26,7 @@ public class Mine {
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
     public void dispatchLorry(){
-        this.dock.getCurrentLorry().goToFerry();
+        this.dock.getCurrentLorry().start();
     }
 
     public boolean lorryAvailable(){

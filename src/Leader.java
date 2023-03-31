@@ -24,21 +24,22 @@ public class Leader {
      */
     private List<Worker> mineWorkers;
 
-    /**
-     *
-     */
-    private int availableWorkers;
+    private InfoWorkers infoWorkers;
+
+    private Reporter reporter;
+
     /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     /**
      * Constructor, that creates instance of shift leader that is assigned a mine and name of the site map.
      * @param siteMapName Name of the site map.
      */
-    public Leader(String siteMapName, Mine assignedMine, int availableWorkers) {
+    public Leader(String siteMapName, Mine assignedMine, InfoWorkers infoWorkers, Reporter reporter) {
         this.siteMapName = siteMapName;
         this.assignedMine = assignedMine;
         this.mineWorkers = new ArrayList<>();
-        this.availableWorkers = availableWorkers;
+        this.infoWorkers = infoWorkers;
+        this.reporter = reporter;
     }
 
     /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
@@ -48,7 +49,17 @@ public class Leader {
      * @throws FileNotFoundException If site map cannot be found.
      */
     public void inspectMiningSite() throws FileNotFoundException {
+        int mineBlocks = this.assignedMine.getWorkBlocks().size();
+        int mineFields = 0;
+
         this.assignedMine.setWorkBlocks(Parser.parseIntoBlocks(siteMapName));
+
+        for (WorkBlock workBlock: this.assignedMine.getWorkBlocks()) {
+            mineFields += workBlock.getFieldCount();
+        }
+
+        reporter.report("Simulation time: 0ms, Role: Leader, Number of thread: undef, Message:" +
+                " Inspection of mining site done, mine blocks: "+mineBlocks+", mine fields: "+mineFields);
     }
 
     /**
@@ -75,9 +86,25 @@ public class Leader {
             if (worker.isDone()) return worker;
         }
 
-        if (this.mineWorkers.size() == this.availableWorkers)  return null;
+        if (this.mineWorkers.size() == this.infoWorkers.getAvailableWorkers())  return null;
 
-        //Worker newWorker = new Worker(null, )
+        Worker newWorker = new Worker(null, infoWorkers.getWorkerTime(), assignedMine);
+        this.mineWorkers.add(newWorker);
+        return newWorker;
+    }
+
+    public void organizeWorkers(){
+        Worker worker;
+        for (WorkBlock workBlock: this.assignedMine.getWorkBlocks()){
+            if ((worker = this.findWorker()) == null) return;
+            worker.setAssignedWorkBlock(workBlock);
+        }
+    }
+
+    public void startMining(){
+        for (Worker worker: this.mineWorkers) {
+            worker.start();
+        }
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/
