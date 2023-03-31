@@ -1,4 +1,5 @@
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,16 +23,22 @@ public class Leader {
      * Workers answering to leader.
      */
     private List<Worker> mineWorkers;
-/*___________________________________________________CONSTRUCTORS_____________________________________________________*/
+
+    /**
+     *
+     */
+    private int availableWorkers;
+    /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     /**
      * Constructor, that creates instance of shift leader that is assigned a mine and name of the site map.
      * @param siteMapName Name of the site map.
      */
-    public Leader(String siteMapName, List<Worker> mineWorkers, Mine assignedMine) {
+    public Leader(String siteMapName, Mine assignedMine, int availableWorkers) {
         this.siteMapName = siteMapName;
         this.assignedMine = assignedMine;
-        this.mineWorkers = mineWorkers;
+        this.mineWorkers = new ArrayList<>();
+        this.availableWorkers = availableWorkers;
     }
 
     /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
@@ -67,7 +74,10 @@ public class Leader {
         for (Worker worker: this.mineWorkers) {
             if (worker.isDone()) return worker;
         }
-        return null;
+
+        if (this.mineWorkers.size() == this.availableWorkers)  return null;
+
+        //Worker newWorker = new Worker(null, )
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/

@@ -1,6 +1,6 @@
 import java.util.Random;
 
-public class Lorry {
+public class Lorry extends Thread{
 
 /*_________________________________________________CLASS_ATTRIBUTES___________________________________________________*/
 
@@ -26,14 +26,11 @@ public class Lorry {
     private boolean isFull;
 
     /**
-     * Assigned mining site to be loaded at.
-     */
-    private Mine assignedMine;
-
-    /**
      * Assigned dock with waiting ferry.
      */
     private Ferry assignedFerry;
+
+    private boolean isDispatched;
 
     /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
@@ -43,13 +40,13 @@ public class Lorry {
      * @param lorryCapacity Maximum capacity of lorry.
      * @param lorryTime Time it takes lorry to get to ferry (and vice versa).
      */
-    public Lorry(int lorryCapacity, int lorryTime, Mine assignedMine, Ferry assignedFerry) {
+    public Lorry(int lorryCapacity, int lorryTime, Ferry assignedFerry) {
         this.lorryCapacity = lorryCapacity;
         this.currentCapacity = lorryCapacity;
         this.lorryTime = lorryTime;
         this.isFull = false;
-        this.assignedMine = assignedMine;
         this.assignedFerry = assignedFerry;
+        this.isDispatched = false;
     }
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
@@ -58,9 +55,24 @@ public class Lorry {
      * Method representing lorry going to dock with waiting ferry.
      */
     public void goToFerry(){
-        //wait for lorryTime
-        assignedMine.setCurrentLorry(null);
-        //ferry.getTo
+        //wait for generateFerryTime()
+        //assignedMine.setCurrentLorry(null);
+        assignedFerry.loadFerry(this);
+    }
+
+    public void getOffFerry(){
+        //wait for generateFinishTime()
+    }
+
+    /**
+     * Method generating time it takes
+     * lorry to get to its final destination.
+     * @return Time it takes lorry to get to its final destination.
+     */
+    private int generateFinishTime(){
+        Random rd = new Random();
+
+        return rd.nextInt(this.lorryTime - 1) + 1;
     }
 
     /**
@@ -68,14 +80,14 @@ public class Lorry {
      * lorry to get to dock with waiting ferry.
      * @return Time it takes lorry to get to dock with waiting ferry.
      */
-    private int generateTime(){
+    private int generateFerryTime(){
         Random rd = new Random();
 
-        return rd.nextInt(this.lorryTime - 1) + 1;
+        return rd.nextInt(this.lorryTime - 2) + 1;
     }
 
     /**
-     * Methos representing loading lorry with one piece of mined material.
+     * Methos representing loading lorry with mined material.
      */
     public void load(){
         this.currentCapacity--;
@@ -86,11 +98,23 @@ public class Lorry {
      * Method representing lorry waiting in assigned mine to be loaded.
      */
     public void dockAtMine(){
-        assignedMine.setCurrentLorry(this);
+        //assignedMine.setCurrentLorry(this);
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/
 
-/*______________________________________________________SETTERS_______________________________________________________*/
+    /**
+     * Getter, that returns indicator if lorry is fully loaded.
+     * @return Indicator if lorry is fully loaded.
+     */
+    public boolean isFull() {
+        return isFull;
+    }
+
+    public boolean isDispatched() {
+        return isDispatched;
+    }
+
+    /*______________________________________________________SETTERS_______________________________________________________*/
 
 }

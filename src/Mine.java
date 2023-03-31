@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.List;
 
 public class Mine {
@@ -11,21 +10,35 @@ public class Mine {
     private List<WorkBlock> workBlocks;
 
     /**
-     * Lorry currently waiting in mine to be loaded.
+     * Dock with lorry waiting to be loaded.
      */
-    private Lorry currentLorry;
+    private MineDock dock;
 
     /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     /**
      * Contructor that creates instance of mine with assigned mine leader.
      */
-    public Mine() {
+    public Mine(MineDock dock) {
+        this.dock = dock;
     }
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
+    public void dispatchLorry(){
+        this.dock.getCurrentLorry().goToFerry();
+    }
 
+    public boolean lorryAvailable(){
+        return this.dock.getCurrentLorry() != null;
+    }
+
+    public boolean loadLorry(){
+        if (this.dock.getCurrentLorry().isFull()) return false;
+
+        this.dock.getCurrentLorry().load();
+        return true;
+    }
 
 /*______________________________________________________GETTERS_______________________________________________________*/
 
@@ -37,23 +50,7 @@ public class Mine {
         return workBlocks;
     }
 
-    /**
-     * Getter, that returns current lorry waiting in the mine.
-     * @return Current lorry waiting in the mine.
-     */
-    public Lorry getCurrentLorry() {
-        return currentLorry;
-    }
-
     /*______________________________________________________SETTERS_______________________________________________________*/
-
-    /**
-     * Setter, that sets current lorry waiting in the mine.
-     * @param currentLorry Current lorry waiting in the mine.
-     */
-    public void setCurrentLorry(Lorry currentLorry) {
-        this.currentLorry = currentLorry;
-    }
 
     /**
      * Setter, that sets list of found working blocks.

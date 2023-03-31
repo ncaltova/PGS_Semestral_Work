@@ -1,6 +1,6 @@
 import java.util.Random;
 
-public class Worker {
+public class Worker extends Thread{
 
 /*_________________________________________________CLASS_ATTRIBUTES___________________________________________________*/
 
@@ -28,7 +28,7 @@ public class Worker {
      */
     private int minedMaterial;
 
-/*___________________________________________________CONSTRUCTORS_____________________________________________________*/
+    /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     /**
      * Constructor, that creates instance of worker with assigned job and lorry to load.
@@ -39,12 +39,19 @@ public class Worker {
 
         this.assignedWorkBlock = assignedWorkBlock;
         this.workerTime = workerTime;
-        this.isDone = false;
         this.assignedMine = assignedMine;
         this.minedMaterial = assignedWorkBlock.getFieldCount();
     }
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
+
+    @Override
+    public void run() {
+        this.isDone = false;
+        this.mine();
+        this.load();
+        this.isDone = true;
+    }
 
     /**
      * Method representing worker mining assigned work block.
@@ -53,7 +60,6 @@ public class Worker {
     public void mine() {
 
         while (!assignedWorkBlock.isEmpty()){
-            //wait for generateTime();
             assignedWorkBlock.mineField();
         }
 
@@ -66,11 +72,16 @@ public class Worker {
     public void load() {
 
         while (this.minedMaterial > 0){
-            //wait for assignedWorkBlock.getFieldCount;
-            assignedMine.getCurrentLorry().load();
-            this.minedMaterial--;
+           //If lorry did not dock at mine yet
+           if (!assignedMine.lorryAvailable()) continue;
+
+           //Load one piece of mined material
+           this.minedMaterial--;
+
+           //If current lorry is full, set it to ferry
+           if (!assignedMine.loadLorry()) assignedMine.dispatchLorry();
         }
-        this.isDone = true;
+
     }
 
     /**
@@ -79,15 +90,7 @@ public class Worker {
      */
     public int generateTime() {
         Random rd = new Random();
-
-        return rd.nextInt(this.workerTime) + 1;
-    }
-
-    /**
-     * Method representing worker sending lorry to ferry.
-     */
-    public void sentLorryAway(){
-        assignedMine.getCurrentLorry().goToFerry();
+        return (rd.nextInt(this.workerTime) + 1)*1000;
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/
