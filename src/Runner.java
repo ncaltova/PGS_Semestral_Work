@@ -1,3 +1,5 @@
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.concurrent.CyclicBarrier;
 
 public class Runner {
@@ -7,23 +9,36 @@ public class Runner {
         ParameterCarrier parameterCarrier = parseInput(args);
 
         //Initialization of simulation reporter
-        Reporter reporter = new Reporter(parameterCarrier.getOutputFile());
+        Reporter reporter = null;
+
+        try {
+            reporter = new Reporter(parameterCarrier.getOutputFile());
+        } catch (IOException e) {
+            System.out.println("Could not initialize reporter, exiting program...");
+            throw new RuntimeException(e);
+        }
 
         //Initialization of mining site
         CyclicBarrier ferry = new CyclicBarrier(parameterCarrier.getCapFerry());
-        Lorry firstLorry = new Lorry(parameterCarrier.getCapLorry(), parameterCarrier.gettLorry(), ferry);
+        Lorry firstLorry = new Lorry(parameterCarrier.getCapLorry(), parameterCarrier.gettLorry(), ferry, reporter);
         MineDock dock = new MineDock(firstLorry);
         Mine mine = new Mine(dock);
         Leader shiftLeader = new Leader(parameterCarrier.getInputFile(), mine, new InfoWorkers(parameterCarrier.gettWorker(),
                 parameterCarrier.getcWorker()), reporter);
 
         //Leader inspecting mining site
-        shiftLeader.inspectMiningSite();
-
+        try {
+            shiftLeader.inspectMiningSite();
+        } catch (FileNotFoundException e) {
+            System.out.println("Could not initialize mining site, exiting program...");
+            throw new RuntimeException(e);
+        }
 
         //Initialization of mine workers
-        shiftLeader.organizeWorkers();
-        shiftLeader.startMining();
+        while (!mine.isEmpty()) {
+            shiftLeader.organizeWorkers();
+            shiftLeader.startMining();
+        }
 
     }
 

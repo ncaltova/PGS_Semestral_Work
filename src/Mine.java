@@ -26,10 +26,11 @@ public class Mine {
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
     public void dispatchLorry(){
-        this.dock.getCurrentLorry().start();
+        this.dock.dispatchLorry();
     }
 
     public boolean lorryAvailable(){
+
         return this.dock.getCurrentLorry() != null;
     }
 
@@ -50,7 +51,18 @@ public class Mine {
         return workBlocks;
     }
 
-    /*______________________________________________________SETTERS_______________________________________________________*/
+    public boolean isEmpty(){
+
+        for (WorkBlock workBlock: this.workBlocks) {
+            if (!workBlock.isEmpty()){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+/*______________________________________________________SETTERS_______________________________________________________*/
 
     /**
      * Setter, that sets list of found working blocks.

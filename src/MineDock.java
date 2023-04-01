@@ -20,14 +20,12 @@ public class MineDock {
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
-    public void dockAtDock(){
+    public void dispatchLorry(){
 
-        while (!this.currentLorry.isDispatched()){
-            this.currentLorry.sleep(500);
-        }
+        Thread dispatchedLorry = new Thread(this.currentLorry);
+        dispatchedLorry.start();
 
         this.currentLorry = null;
-
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/

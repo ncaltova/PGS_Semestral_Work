@@ -1,6 +1,6 @@
 import java.util.Random;
 
-public class Worker extends Thread{
+public class Worker implements Runnable{
 
 /*_________________________________________________CLASS_ATTRIBUTES___________________________________________________*/
 
@@ -30,12 +30,7 @@ public class Worker extends Thread{
     private int minedMaterial;
 
     /**
-     * Current simulation time for this thread.
-     */
-    private int simTime;
-
-    /**
-     *
+     * Instance of state reporter
      */
     private Reporter reporter;
 
@@ -48,13 +43,12 @@ public class Worker extends Thread{
      * @param assignedWorkBlock Work block assigned to worker.
      * @param workerTime Maximum speed to mine one field in work block for worker.
      */
-    public Worker(WorkBlock assignedWorkBlock, int workerTime, Mine assignedMine, int simTime, Reporter reporter) {
+    public Worker(WorkBlock assignedWorkBlock, int workerTime, Mine assignedMine, Reporter reporter) {
 
         this.assignedWorkBlock = assignedWorkBlock;
         this.workerTime = workerTime;
         this.assignedMine = assignedMine;
         this.minedMaterial = assignedWorkBlock.getFieldCount();
-        this.simTime = simTime;
         this.reporter = reporter;
 
     }
@@ -63,28 +57,32 @@ public class Worker extends Thread{
 
     @Override
     public void run() {
-        this.isDone = false;
-        this.mine();
-        this.load();
-        this.isDone = true;
+        try {
+
+            this.isDone = false;
+            this.mine();
+            this.load();
+            this.isDone = true;
+
+        } catch (InterruptedException e) {
+            System.out.println("Thread id#"+Thread.currentThread().getId()+" was interrupted during its work, exiting program ...");
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * Method representing worker mining assigned work block.
      * Mining one block takes worker between zero (exlusive) and max mining time tWorker (inclusive).
      */
-    public void mine() {
-        int mineTime = 0;
+    public void mine() throws InterruptedException {
 
         while (!assignedWorkBlock.isEmpty()){
             assignedWorkBlock.mineField();
-            int currentTime = this.generateTime();
-            this.sleep(currentTime);
-            mineTime += currentTime;
+            SandMan.waitFor(this.generateTime());
         }
 
-        reporter.report("Simulation time: "+this.simTime+"ms, Role: Worker, Number of thread: "+this.getId()+", Message:" +
-                " Mining one work block done, final time: "+mineTime+"ms");
+//        reporter.report("Simulation time: "++"ms, Role: Worker, Number of thread: "+this.getId()+", Message:" +
+//                " Mining one work block done, final time: "+mineTime+"ms");
 
     }
 
@@ -92,7 +90,7 @@ public class Worker extends Thread{
      * Method representing worker loading lorry with mined material.
      * Loading one mined field takes one second.
      */
-    public void load() {
+    public void load() throws InterruptedException {
 
         while (this.minedMaterial > 0){
            //If lorry did not dock at mine yet
@@ -100,7 +98,7 @@ public class Worker extends Thread{
 
            //Load one piece of mined material
            this.minedMaterial--;
-           this.sleep(10);
+            SandMan.waitFor(10);
 
            //If current lorry is full, set it to ferry
            if (!assignedMine.loadLorry()) assignedMine.dispatchLorry();

@@ -13,24 +13,32 @@ public class Reporter {
      * Report file to write reports to.
      */
     private final File reportFile;
-
-    /**
-     * Current time of simulation.
-     */
-    private int simTime;
 /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     public Reporter(String reportFileName) throws IOException {
         this.reportFile = new File(reportFileName);
         this.fileWriter = new FileWriter(reportFile);
-        this.simTime = 0;
     }
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
-    public synchronized void report(String log) throws IOException {
-        this.fileWriter.write(log);
+    public synchronized void report(String log) {
+        try {
+            this.fileWriter.write(log);
+        } catch (IOException e) {
+            System.out.println("Reporting to output file has failed, exiting program ...");
+            throw new RuntimeException(e);
+        }
         System.out.println(log);
+    }
+
+    public void closeReporter(){
+        try {
+            this.fileWriter.close();
+        } catch (IOException e) {
+            System.out.println("Closing reporter instance has failed, exiting program ...");
+            throw new RuntimeException(e);
+        }
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/

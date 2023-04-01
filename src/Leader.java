@@ -58,22 +58,22 @@ public class Leader {
             mineFields += workBlock.getFieldCount();
         }
 
-        reporter.report("Simulation time: 0ms, Role: Leader, Number of thread: undef, Message:" +
-                " Inspection of mining site done, mine blocks: "+mineBlocks+", mine fields: "+mineFields);
+        reportInspection(mineBlocks, mineFields);
+
     }
 
-    /**
-     * Method representing leader assigning work to assigned workers.
-     * @param designatedBlock Work block for leader to assign.
-     */
-    public void assignWork(WorkBlock designatedBlock){
-        Worker designatedWorker = findWorker();
-
-        if (designatedWorker != null) {
-            designatedWorker.setDone(false);
-            designatedWorker.setAssignedWorkBlock(designatedBlock);
-        }
-
+    private void reportInspection(int mineBlocks, int mineFields){
+        reporter.report(
+        "{"+
+            "\t\"Simulation time\": \""+System.currentTimeMillis()+"ms\",\n"+
+            "\t\"Role\": \"Leader\"\n,"+
+            "\t\"ThreadId\": \"undef\",\n"+
+            "\t\"Message\": {\n"+
+                "\t\t\"Content\": \"Inspection of mining site done.\",\n"+
+                "\t\t\"mineBlocks\": \""+mineBlocks+"\",\n"+
+                "\t\t\"mineFields\": \""+mineFields+"\"\n"+
+            "\t}"+
+        "}");
     }
 
     /**
@@ -88,7 +88,7 @@ public class Leader {
 
         if (this.mineWorkers.size() == this.infoWorkers.getAvailableWorkers())  return null;
 
-        Worker newWorker = new Worker(null, infoWorkers.getWorkerTime(), assignedMine);
+        Worker newWorker = new Worker(null, infoWorkers.getWorkerTime(), assignedMine, reporter);
         this.mineWorkers.add(newWorker);
         return newWorker;
     }
@@ -103,7 +103,8 @@ public class Leader {
 
     public void startMining(){
         for (Worker worker: this.mineWorkers) {
-            worker.start();
+            Thread occupiedWorker = new Thread(worker);
+            worker.run();
         }
     }
 

@@ -1,7 +1,8 @@
 import java.util.Random;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
-public class Lorry extends Thread{
+public class Lorry implements Runnable{
 
 /*_________________________________________________CLASS_ATTRIBUTES___________________________________________________*/
 
@@ -31,10 +32,7 @@ public class Lorry extends Thread{
      */
     private CyclicBarrier assignedFerry;
 
-    /**
-     * Current simulation time for this thread.
-     */
-    private int simTime;
+    private Reporter reporter;
 
     /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
@@ -44,23 +42,33 @@ public class Lorry extends Thread{
      * @param lorryCapacity Maximum capacity of lorry.
      * @param lorryTime Time it takes lorry to get to ferry (and vice versa).
      */
-    public Lorry(int lorryCapacity, int lorryTime, CyclicBarrier assignedFerry) {
+    public Lorry(int lorryCapacity, int lorryTime, CyclicBarrier assignedFerry, Reporter reporter) {
         this.lorryCapacity = lorryCapacity;
         this.currentCapacity = lorryCapacity;
         this.lorryTime = lorryTime;
         this.isFull = false;
         this.assignedFerry = assignedFerry;
+        this.reporter = reporter;
     }
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
     @Override
     public void run() {
-        int ferryTime = this.generateFerryTime();
-        this.sleep(ferryTime);
-        this.assignedFerry.await();
-        int finishTime = this.generateFinishTime();
-        this.sleep(finishTime);
+        try {
+
+            SandMan.waitFor(this.generateFerryTime());
+            this.assignedFerry.await();
+            SandMan.waitFor(this.generateFinishTime());
+
+        } catch (InterruptedException e) {
+            System.out.println("Thread id#"+Thread.currentThread().getId()+" was interrupted during its work, exiting program ...");
+            throw new RuntimeException(e);
+
+        } catch (BrokenBarrierException e) {
+            System.out.println("Barrier has been broken by one of running threads during its work, exiting program ...");
+            throw new RuntimeException(e);
+        }
     }
 
     /**
