@@ -34,6 +34,9 @@ public class Lorry implements Runnable{
 
     private Reporter reporter;
 
+    private long startTime;
+    private long timeCreated;
+
     /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     /**
@@ -42,13 +45,17 @@ public class Lorry implements Runnable{
      * @param lorryCapacity Maximum capacity of lorry.
      * @param lorryTime Time it takes lorry to get to ferry (and vice versa).
      */
-    public Lorry(int lorryCapacity, int lorryTime, CyclicBarrier assignedFerry, Reporter reporter) {
+    public Lorry(int lorryCapacity, int lorryTime, CyclicBarrier assignedFerry, Reporter reporter, long startTime) {
+
         this.lorryCapacity = lorryCapacity;
         this.currentCapacity = lorryCapacity;
         this.lorryTime = lorryTime;
         this.isFull = false;
         this.assignedFerry = assignedFerry;
         this.reporter = reporter;
+        this.startTime = startTime;
+        this.timeCreated = System.currentTimeMillis();
+
     }
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
@@ -56,10 +63,27 @@ public class Lorry implements Runnable{
     @Override
     public void run() {
         try {
+            long ferryTime = this.generateFerryTime();
+            long finishTime = this.generateFinishTime();
+            boolean firstOnFerry = false;
+            long ferryStartTime = 0;
 
-            SandMan.waitFor(this.generateFerryTime());
+            this.reportLoaded(this.timeCreated - System.currentTimeMillis());
+
+            SandMan.waitFor(ferryTime);
+            this.reportFerry(ferryTime);
+
+            if (assignedFerry.getNumberWaiting() == 0) {
+                firstOnFerry = true;
+                ferryStartTime = System.currentTimeMillis();
+            }
+
             this.assignedFerry.await();
-            SandMan.waitFor(this.generateFinishTime());
+
+            if (firstOnFerry) reportFerryDepart(System.currentTimeMillis() - ferryStartTime);
+
+            SandMan.waitFor(finishTime);
+            this.reportFinish(finishTime);
 
         } catch (InterruptedException e) {
             System.out.println("Thread id#"+Thread.currentThread().getId()+" was interrupted during its work, exiting program ...");
@@ -69,6 +93,29 @@ public class Lorry implements Runnable{
             System.out.println("Barrier has been broken by one of running threads during its work, exiting program ...");
             throw new RuntimeException(e);
         }
+    }
+
+    private void reportLoaded(long timeElapsed) {
+        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Lorry, ThreadID: " +
+                Thread.currentThread().getId() + ", Message: Current lorry has been fully loaded," +
+                " Time elapsed: "+ timeElapsed);
+    }
+
+    private void reportFerry(long timeElapsed) {
+        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Lorry, ThreadID: " +
+                Thread.currentThread().getId() + ", Message: Lorry successfully reached ferry," +
+                " Time elapsed: "+ timeElapsed);
+    }
+
+    private void reportFinish(long timeElapsed) {
+        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Lorry, ThreadID: " +
+                Thread.currentThread().getId() + ", Message: Lorry successfully reached its finish," +
+                " Time elapsed: "+ timeElapsed);
+    }
+
+    private void reportFerryDepart(long timeElapsed) {
+        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Ferry, ThreadID: undef," +
+                " Message: Ferry has departed, Time elapsed: "+ timeElapsed);
     }
 
     /**

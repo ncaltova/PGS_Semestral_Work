@@ -41,6 +41,10 @@ public class Mine {
         return true;
     }
 
+    public void loadNewLorry(Lorry lorry){
+        this.dock.setCurrentLorry(lorry);
+    }
+
 /*______________________________________________________GETTERS_______________________________________________________*/
 
     /**

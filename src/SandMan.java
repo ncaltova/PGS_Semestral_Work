@@ -1,6 +1,6 @@
 public class SandMan {
 
-    public static void waitFor(int waitTime) throws InterruptedException {
+    public static void waitFor(long waitTime) throws InterruptedException {
         long startTime = System.currentTimeMillis();
         long elapsedTime = 0;
 

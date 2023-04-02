@@ -33,6 +33,7 @@ public class Worker implements Runnable{
      * Instance of state reporter
      */
     private Reporter reporter;
+    private long startTime;
 
 
 
@@ -40,16 +41,16 @@ public class Worker implements Runnable{
 
     /**
      * Constructor, that creates instance of worker with assigned job and lorry to load.
-     * @param assignedWorkBlock Work block assigned to worker.
      * @param workerTime Maximum speed to mine one field in work block for worker.
      */
-    public Worker(WorkBlock assignedWorkBlock, int workerTime, Mine assignedMine, Reporter reporter) {
+    public Worker(int workerTime, Mine assignedMine, Reporter reporter, long startTime) {
 
-        this.assignedWorkBlock = assignedWorkBlock;
+        this.assignedWorkBlock = null;
         this.workerTime = workerTime;
         this.assignedMine = assignedMine;
-        this.minedMaterial = assignedWorkBlock.getFieldCount();
+        this.minedMaterial = 0;
         this.reporter = reporter;
+        this.startTime = startTime;
 
     }
 
@@ -58,10 +59,15 @@ public class Worker implements Runnable{
     @Override
     public void run() {
         try {
-
             this.isDone = false;
+            long mineStart = System.currentTimeMillis();
+            this.minedMaterial = 0;
+
             this.mine();
+            this.reportMinedBlock(System.currentTimeMillis() - mineStart);
+
             this.load();
+
             this.isDone = true;
 
         } catch (InterruptedException e) {
@@ -70,20 +76,33 @@ public class Worker implements Runnable{
         }
     }
 
+    private void reportMinedField(long timeElapsed){
+        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Worker, ThreadID: " +
+                Thread.currentThread().getId() + ", Message: One field form assigned block successfully mined," +
+                " Time elapsed: "+ timeElapsed);
+    }
+
+    private void reportMinedBlock(long timeElapsed){
+        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Worker, ThreadID: " +
+                Thread.currentThread().getId() + ", Message: Assigned work block successfully mined," +
+                " Time elapsed: "+ timeElapsed);
+    }
+
     /**
      * Method representing worker mining assigned work block.
      * Mining one block takes worker between zero (exlusive) and max mining time tWorker (inclusive).
      */
     public void mine() throws InterruptedException {
-
+        long timeElapsed;
         while (!assignedWorkBlock.isEmpty()){
+            timeElapsed = this.generateTime();
+
             assignedWorkBlock.mineField();
-            SandMan.waitFor(this.generateTime());
+            SandMan.waitFor(timeElapsed);
+            this.minedMaterial++;
+
+            this.reportMinedBlock(timeElapsed);
         }
-
-//        reporter.report("Simulation time: "++"ms, Role: Worker, Number of thread: "+this.getId()+", Message:" +
-//                " Mining one work block done, final time: "+mineTime+"ms");
-
     }
 
     /**

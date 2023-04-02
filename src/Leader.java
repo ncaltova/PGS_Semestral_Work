@@ -27,6 +27,7 @@ public class Leader {
     private InfoWorkers infoWorkers;
 
     private Reporter reporter;
+    private long startTime;
 
     /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
@@ -34,12 +35,15 @@ public class Leader {
      * Constructor, that creates instance of shift leader that is assigned a mine and name of the site map.
      * @param siteMapName Name of the site map.
      */
-    public Leader(String siteMapName, Mine assignedMine, InfoWorkers infoWorkers, Reporter reporter) {
+    public Leader(String siteMapName, Mine assignedMine, InfoWorkers infoWorkers, Reporter reporter, long startTime) {
+
         this.siteMapName = siteMapName;
         this.assignedMine = assignedMine;
         this.mineWorkers = new ArrayList<>();
         this.infoWorkers = infoWorkers;
         this.reporter = reporter;
+        this.startTime = startTime;
+
     }
 
     /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
@@ -49,31 +53,25 @@ public class Leader {
      * @throws FileNotFoundException If site map cannot be found.
      */
     public void inspectMiningSite() throws FileNotFoundException {
-        int mineBlocks = this.assignedMine.getWorkBlocks().size();
+        int mineBlocks = 0;
         int mineFields = 0;
 
         this.assignedMine.setWorkBlocks(Parser.parseIntoBlocks(siteMapName));
+        mineBlocks = this.assignedMine.getWorkBlocks().size();
 
-        for (WorkBlock workBlock: this.assignedMine.getWorkBlocks()) {
+        for (WorkBlock workBlock : this.assignedMine.getWorkBlocks()) {
             mineFields += workBlock.getFieldCount();
         }
 
-        reportInspection(mineBlocks, mineFields);
-
+        this.reportInspection(mineBlocks, mineFields);
     }
 
     private void reportInspection(int mineBlocks, int mineFields){
-        reporter.report(
-        "{"+
-            "\t\"Simulation time\": \""+System.currentTimeMillis()+"ms\",\n"+
-            "\t\"Role\": \"Leader\"\n,"+
-            "\t\"ThreadId\": \"undef\",\n"+
-            "\t\"Message\": {\n"+
-                "\t\t\"Content\": \"Inspection of mining site done.\",\n"+
-                "\t\t\"mineBlocks\": \""+mineBlocks+"\",\n"+
-                "\t\t\"mineFields\": \""+mineFields+"\"\n"+
-            "\t}"+
-        "}");
+
+        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime)  + ", Role: Leader, ThreadID: " +
+                Thread.currentThread().getId() + ", Message: Inspection of mining site done, Mine blocks: " + mineBlocks +
+                ", Mine fields: " + mineFields);
+
     }
 
     /**
@@ -88,7 +86,9 @@ public class Leader {
 
         if (this.mineWorkers.size() == this.infoWorkers.getAvailableWorkers())  return null;
 
-        Worker newWorker = new Worker(null, infoWorkers.getWorkerTime(), assignedMine, reporter);
+        Worker newWorker = new Worker(this.infoWorkers.getWorkerTime(), this.assignedMine,
+                this.reporter, this.startTime);
+
         this.mineWorkers.add(newWorker);
         return newWorker;
     }
@@ -102,10 +102,21 @@ public class Leader {
     }
 
     public void startMining(){
+        Thread occupiedWorker;
         for (Worker worker: this.mineWorkers) {
-            Thread occupiedWorker = new Thread(worker);
+            if (!worker.isDone()) continue;
+            occupiedWorker = new Thread(worker);
             worker.run();
         }
+    }
+
+    public boolean allWorkersDone(){
+
+        for (Worker worker: this.mineWorkers) {
+            if (!worker.isDone()) return false;
+        }
+
+        return true;
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/

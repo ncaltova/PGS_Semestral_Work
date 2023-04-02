@@ -19,12 +19,13 @@ public class Runner {
         }
 
         //Initialization of mining site
+        long startTime = System.currentTimeMillis();
         CyclicBarrier ferry = new CyclicBarrier(parameterCarrier.getCapFerry());
-        Lorry firstLorry = new Lorry(parameterCarrier.getCapLorry(), parameterCarrier.gettLorry(), ferry, reporter);
+        Lorry firstLorry = new Lorry(parameterCarrier.getCapLorry(), parameterCarrier.gettLorry(), ferry, reporter, startTime);
         MineDock dock = new MineDock(firstLorry);
         Mine mine = new Mine(dock);
         Leader shiftLeader = new Leader(parameterCarrier.getInputFile(), mine, new InfoWorkers(parameterCarrier.gettWorker(),
-                parameterCarrier.getcWorker()), reporter);
+                parameterCarrier.getcWorker()), reporter, startTime);
 
         //Leader inspecting mining site
         try {
@@ -36,9 +37,28 @@ public class Runner {
 
         //Initialization of mine workers
         while (!mine.isEmpty()) {
+
             shiftLeader.organizeWorkers();
             shiftLeader.startMining();
+
+            if (!mine.lorryAvailable())
+                mine.loadNewLorry(new Lorry(parameterCarrier.getCapLorry(), parameterCarrier.gettLorry(),
+                        ferry, reporter, startTime));
         }
+
+        boolean allDone = false;
+
+        while (!allDone){
+            try {
+                SandMan.waitFor(10);
+            } catch (InterruptedException e) {
+                System.out.println("Thread main got interrupted during sleeping, exiting program...");
+                throw new RuntimeException(e);
+            }
+            allDone = shiftLeader.allWorkersDone();
+        }
+
+        if (mine.lorryAvailable()) mine.dispatchLorry();
 
     }
 

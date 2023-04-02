@@ -19,7 +19,7 @@ public class Parser {
      * @throws FileNotFoundException If said input file cannot be found.
      */
     public static List<WorkBlock> parseIntoBlocks(String fileName) throws FileNotFoundException {
-        File inputFile = new File("filename.txt");
+        File inputFile = new File(fileName);
         Scanner fileReader = new Scanner(inputFile);
         ArrayList<WorkBlock> outputList = new ArrayList<>();
 

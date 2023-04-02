@@ -20,7 +20,7 @@ public class MineDock {
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
-    public void dispatchLorry(){
+    public void dispatchLorry() {
 
         Thread dispatchedLorry = new Thread(this.currentLorry);
         dispatchedLorry.start();
