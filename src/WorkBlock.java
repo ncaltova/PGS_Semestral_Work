@@ -9,6 +9,8 @@ public class WorkBlock {
     /** Boolean indicating whether the work block is empty or not */
     private boolean isEmpty;
 
+    private boolean isTaken;
+
 /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     /**
@@ -29,9 +31,9 @@ public class WorkBlock {
      * Method that represents mining out one field of work block.
      * Decrements field count and sets isEmpty indicator to the corresponding value.
      */
-    public void mineField(){
+    public synchronized void mineField(){
         this.fieldLeftCount--;
-        if (this.fieldLeftCount == 0) this.isEmpty = true;
+        if (this.fieldLeftCount <= 0) this.isEmpty = true;
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/
@@ -53,4 +55,11 @@ public class WorkBlock {
         return isEmpty;
     }
 
+    public boolean isTaken() {
+        return isTaken;
+    }
+
+    public void setTaken(boolean taken) {
+        isTaken = taken;
+    }
 }

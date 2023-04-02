@@ -37,6 +37,8 @@ public class Lorry implements Runnable{
     private long startTime;
     private long timeCreated;
 
+    private boolean isDone;
+
     /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     /**
@@ -68,7 +70,7 @@ public class Lorry implements Runnable{
             boolean firstOnFerry = false;
             long ferryStartTime = 0;
 
-            this.reportLoaded(this.timeCreated - System.currentTimeMillis());
+            this.reportLoaded(System.currentTimeMillis() - this.timeCreated);
 
             SandMan.waitFor(ferryTime);
             this.reportFerry(ferryTime);
@@ -84,6 +86,7 @@ public class Lorry implements Runnable{
 
             SandMan.waitFor(finishTime);
             this.reportFinish(finishTime);
+            this.isDone = true;
 
         } catch (InterruptedException e) {
             System.out.println("Thread id#"+Thread.currentThread().getId()+" was interrupted during its work, exiting program ...");
@@ -158,6 +161,10 @@ public class Lorry implements Runnable{
         return isFull;
     }
 
-/*______________________________________________________SETTERS_______________________________________________________*/
+    public boolean isDone() {
+        return isDone;
+    }
+
+    /*______________________________________________________SETTERS_______________________________________________________*/
 
 }

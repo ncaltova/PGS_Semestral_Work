@@ -25,7 +25,7 @@ public class Mine {
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
-    public void dispatchLorry(){
+    public synchronized void dispatchLorry(){
         this.dock.dispatchLorry();
     }
 
@@ -34,7 +34,7 @@ public class Mine {
         return this.dock.getCurrentLorry() != null;
     }
 
-    public boolean loadLorry(){
+    public synchronized boolean loadLorry(){
         if (this.dock.getCurrentLorry().isFull()) return false;
 
         this.dock.getCurrentLorry().load();

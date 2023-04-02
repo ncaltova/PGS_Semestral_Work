@@ -96,18 +96,20 @@ public class Leader {
     public void organizeWorkers(){
         Worker worker;
         for (WorkBlock workBlock: this.assignedMine.getWorkBlocks()){
+            if (workBlock.isTaken() || workBlock.isEmpty()) continue;
             if ((worker = this.findWorker()) == null) return;
+
+            workBlock.setTaken(true);
             worker.setAssignedWorkBlock(workBlock);
+
+            this.startMining(worker);
+            worker.setDone(false);
         }
     }
 
-    public void startMining(){
-        Thread occupiedWorker;
-        for (Worker worker: this.mineWorkers) {
-            if (!worker.isDone()) continue;
-            occupiedWorker = new Thread(worker);
-            worker.run();
-        }
+    public void startMining(Worker worker){
+        Thread occupiedWorker = new Thread(worker);
+        occupiedWorker.start();
     }
 
     public boolean allWorkersDone(){

@@ -39,7 +39,6 @@ public class Runner {
         while (!mine.isEmpty()) {
 
             shiftLeader.organizeWorkers();
-            shiftLeader.startMining();
 
             if (!mine.lorryAvailable())
                 mine.loadNewLorry(new Lorry(parameterCarrier.getCapLorry(), parameterCarrier.gettLorry(),
@@ -58,8 +57,21 @@ public class Runner {
             allDone = shiftLeader.allWorkersDone();
         }
 
-        if (mine.lorryAvailable()) mine.dispatchLorry();
+        Lorry lorry = dock.getCurrentLorry();
+        if (mine.lorryAvailable()){
 
+            mine.dispatchLorry();
+
+            while (!lorry.isDone()){
+                try {
+                    SandMan.waitFor(10);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        reporter.closeReporter();
     }
 
     private static ParameterCarrier parseInput(String[] args){

@@ -35,8 +35,6 @@ public class Worker implements Runnable{
     private Reporter reporter;
     private long startTime;
 
-
-
     /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     /**
@@ -51,6 +49,7 @@ public class Worker implements Runnable{
         this.minedMaterial = 0;
         this.reporter = reporter;
         this.startTime = startTime;
+        this.isDone = true;
 
     }
 
@@ -59,13 +58,9 @@ public class Worker implements Runnable{
     @Override
     public void run() {
         try {
-            this.isDone = false;
-            long mineStart = System.currentTimeMillis();
             this.minedMaterial = 0;
 
             this.mine();
-            this.reportMinedBlock(System.currentTimeMillis() - mineStart);
-
             this.load();
 
             this.isDone = true;
@@ -93,16 +88,24 @@ public class Worker implements Runnable{
      * Mining one block takes worker between zero (exlusive) and max mining time tWorker (inclusive).
      */
     public void mine() throws InterruptedException {
-        long timeElapsed;
+        long waitTime = this.generateTime();
+        long start = System.currentTimeMillis();
+
         while (!assignedWorkBlock.isEmpty()){
-            timeElapsed = this.generateTime();
 
-            assignedWorkBlock.mineField();
-            SandMan.waitFor(timeElapsed);
-            this.minedMaterial++;
+            if (!assignedWorkBlock.isEmpty()) {
 
-            this.reportMinedBlock(timeElapsed);
+                assignedWorkBlock.mineField();
+                SandMan.waitFor(waitTime);
+
+                this.reportMinedField(waitTime);
+
+                this.minedMaterial++;
+            }
+
         }
+
+        this.reportMinedBlock(System.currentTimeMillis() - start);
     }
 
     /**
