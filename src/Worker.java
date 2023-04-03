@@ -1,5 +1,10 @@
 import java.util.Random;
 
+/**
+ * Instances of this class represent individual workers working in mine.
+ * @author Nikol Caltova.
+ * @version 1.0
+ */
 public class Worker implements Runnable{
 
 /*_________________________________________________CLASS_ATTRIBUTES___________________________________________________*/
@@ -10,9 +15,9 @@ public class Worker implements Runnable{
     private WorkBlock assignedWorkBlock;
 
     /**
-     * Mine where assigned workc block is located.
+     * Mine where assigned work block is located.
      */
-    private Mine assignedMine;
+    private final Mine assignedMine;
 
     /**
      * Maximum time it takes worker to mine one field in work block.
@@ -30,16 +35,23 @@ public class Worker implements Runnable{
     private int minedMaterial;
 
     /**
-     * Instance of state reporter
+     * Instance of state reporter.
      */
-    private Reporter reporter;
-    private long startTime;
+    private final Reporter reporter;
 
-    /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
+    /**
+     * Starting time of the whole simulation.
+     */
+    private final long startTime;
+
+/*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     /**
      * Constructor, that creates instance of worker with assigned job and lorry to load.
      * @param workerTime Maximum speed to mine one field in work block for worker.
+     * @param reporter Instance of state reporter.
+     * @param startTime Starting time of the whole simulation.
+     * @param assignedMine Mine where assigned work block is located.
      */
     public Worker(int workerTime, Mine assignedMine, Reporter reporter, long startTime) {
 
@@ -52,42 +64,28 @@ public class Worker implements Runnable{
         this.isDone = true;
 
     }
+/*____________________________________________________METHOD_RUN______________________________________________________*/
 
-/*_________________________________________________INSTANCE_METHODS___________________________________________________*/
-
+    /**
+     * Method representing the work of one worker after being assigned with work.
+     */
     @Override
     public void run() {
-        try {
-            this.minedMaterial = 0;
+        this.minedMaterial = 0;
 
-            this.mine();
-            this.load();
+        this.mine();
+        this.load();
 
-            this.isDone = true;
-
-        } catch (InterruptedException e) {
-            System.out.println("Thread id#"+Thread.currentThread().getId()+" was interrupted during its work, exiting program ...");
-            throw new RuntimeException(e);
-        }
+        this.isDone = true;
     }
 
-    private void reportMinedField(long timeElapsed){
-        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Worker, ThreadID: " +
-                Thread.currentThread().getId() + ", Message: One field form assigned block successfully mined," +
-                " Time elapsed: "+ timeElapsed);
-    }
-
-    private void reportMinedBlock(long timeElapsed){
-        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Worker, ThreadID: " +
-                Thread.currentThread().getId() + ", Message: Assigned work block successfully mined," +
-                " Time elapsed: "+ timeElapsed);
-    }
+/*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
     /**
      * Method representing worker mining assigned work block.
      * Mining one block takes worker between zero (exlusive) and max mining time tWorker (inclusive).
      */
-    public void mine() throws InterruptedException {
+    public void mine() {
         long waitTime = this.generateTime();
         long start = System.currentTimeMillis();
 
@@ -112,21 +110,31 @@ public class Worker implements Runnable{
      * Method representing worker loading lorry with mined material.
      * Loading one mined field takes one second.
      */
-    public void load() throws InterruptedException {
+    public void load() {
 
         while (this.minedMaterial > 0){
-           //If lorry did not dock at mine yet
-           if (!assignedMine.lorryAvailable()) continue;
+            if (assignedMine.isLorryFull()) continue;
 
            //Load one piece of mined material
            this.minedMaterial--;
-            SandMan.waitFor(10);
+           SandMan.waitFor(10);
 
            //If current lorry is full, set it to ferry
            if (!assignedMine.loadLorry()) assignedMine.dispatchLorry();
         }
 
     }
+
+    /**
+     * Method serving for assigning work to this worker.
+     * @param workBlock Work block to be assigned.
+     */
+    public void giveWork(WorkBlock workBlock){
+        this.assignedWorkBlock = workBlock;
+        this.isDone = false;
+    }
+
+/*__________________________________________________TIME_GENERATORS___________________________________________________*/
 
     /**
      * Method generating time it takes worker to mine one field in work block.
@@ -147,21 +155,26 @@ public class Worker implements Runnable{
         return isDone;
     }
 
-/*______________________________________________________SETTERS_______________________________________________________*/
+/*______________________________________________________REPORTS_______________________________________________________*/
 
     /**
-     * Setter, that sets current work block worker is working on.
-     * @param assignedWorkBlock Current work block worker is working on.
+     * Method serving to report the event of mining out one field out of assigned work block.
+     * @param timeElapsed Time it took to mine out said field.
      */
-    public void setAssignedWorkBlock(WorkBlock assignedWorkBlock) {
-        this.assignedWorkBlock = assignedWorkBlock;
+    private void reportMinedField(long timeElapsed){
+        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Worker, ThreadID: " +
+                Thread.currentThread().getId() + ", Message: One field form assigned block successfully mined," +
+                " Time elapsed: "+ timeElapsed);
     }
 
     /**
-     * Setter, that sets indicator of whether worker is done mining and loading lorry.
-     * @param done Indicator of whether worker is done mining and loading lorry.
+     * Method serving to report the event of mining out assigned work block.
+     * @param timeElapsed Time it took to mine out assigned work block.
      */
-    public void setDone(boolean done) {
-        isDone = done;
+    private void reportMinedBlock(long timeElapsed){
+        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Worker, ThreadID: " +
+                Thread.currentThread().getId() + ", Message: Assigned work block successfully mined," +
+                " Time elapsed: "+ timeElapsed);
     }
+
 }

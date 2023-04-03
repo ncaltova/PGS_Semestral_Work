@@ -1,82 +1,137 @@
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.CyclicBarrier;
 
+/**
+ * Class serving as simulation administrator.
+ * @author Nikol Caltova.
+ * @version 1.0
+ */
 public class Runner {
 
+/*_________________________________________________CLASS_ATTRIBUTES___________________________________________________*/
+
+    /**
+     * Instance of command-line arguments carrier.
+     */
+    private static ParameterCarrier parameterCarrier;
+
+    /**
+     * Instance of key events reporter.
+     */
+    private static Reporter reporter;
+
+    /**
+     * Instance of active mine shift leader.
+     */
+    private static Leader shiftLeader;
+
+    /**
+     * Instance of currently active mine.
+     */
+    private static Mine activeMine;
+
+/*___________________________________________________MAIN_METHOD______________________________________________________*/
+
+    /**
+     * Run method of main thread.
+     * @param args Command-line arguments.
+     */
     public static void main(String[] args){
-        //Parsing user input
-        ParameterCarrier parameterCarrier = parseInput(args);
-
-        //Initialization of simulation reporter
-        Reporter reporter = null;
 
         try {
-            reporter = new Reporter(parameterCarrier.getOutputFile());
-        } catch (IOException e) {
-            System.out.println("Could not initialize reporter, exiting program...");
-            throw new RuntimeException(e);
-        }
 
-        //Initialization of mining site
-        long startTime = System.currentTimeMillis();
-        CyclicBarrier ferry = new CyclicBarrier(parameterCarrier.getCapFerry());
-        Lorry firstLorry = new Lorry(parameterCarrier.getCapLorry(), parameterCarrier.gettLorry(), ferry, reporter, startTime);
-        MineDock dock = new MineDock(firstLorry);
-        Mine mine = new Mine(dock);
-        Leader shiftLeader = new Leader(parameterCarrier.getInputFile(), mine, new InfoWorkers(parameterCarrier.gettWorker(),
-                parameterCarrier.getcWorker()), reporter, startTime);
+            //Initialization od mining site
+            simulationInit(args);
 
-        //Leader inspecting mining site
-        try {
+            //Leader inspecting mining site
             shiftLeader.inspectMiningSite();
-        } catch (FileNotFoundException e) {
-            System.out.println("Could not initialize mining site, exiting program...");
+
+        } catch (IOException e) {
+            System.out.println("Either input file could not be found or output file could not be found or created, " +
+                    "exiting program...");
             throw new RuntimeException(e);
         }
 
-        //Initialization of mine workers
-        while (!mine.isEmpty()) {
-
-            shiftLeader.organizeWorkers();
-
-            if (!mine.lorryAvailable())
-                mine.loadNewLorry(new Lorry(parameterCarrier.getCapLorry(), parameterCarrier.gettLorry(),
-                        ferry, reporter, startTime));
-        }
-
-        boolean allDone = false;
-
-        while (!allDone){
-            try {
-                SandMan.waitFor(10);
-            } catch (InterruptedException e) {
-                System.out.println("Thread main got interrupted during sleeping, exiting program...");
-                throw new RuntimeException(e);
-            }
-            allDone = shiftLeader.allWorkersDone();
-        }
-
-        Lorry lorry = dock.getCurrentLorry();
-        if (mine.lorryAvailable()){
-
-            mine.dispatchLorry();
-
-            while (!lorry.isDone()){
-                try {
-                    SandMan.waitFor(10);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
+        //Simulation
+        simulationLoop();
 
         reporter.closeReporter();
     }
 
-    private static ParameterCarrier parseInput(String[] args){
-        return new ParameterCarrier(args[1], args[3], Integer.parseInt(args[5]),
-                Integer.parseInt(args[7]), Integer.parseInt(args[9]),
-                Integer.parseInt(args[11]), Integer.parseInt(args[13]));
+/*___________________________________________________SIMULATION_LOOP__________________________________________________*/
+
+    /**
+     * Method serving as main simulation loop.
+     */
+    private static void simulationLoop(){
+
+        //Initialization of mine workers
+        while (!activeMine.isEmpty()) {
+            shiftLeader.organizeWorkers();
+        }
+
+        //While all workers are not done wait
+        while (!shiftLeader.allWorkersDone()){
+            SandMan.waitFor(10);
+        }
+
+        //Dispatching partially loaded lorry if it is needed.
+        if (activeMine.dispatchLastLorry()){
+            while (!activeMine.isLorryDone()){
+                SandMan.waitFor(10);
+            }
+        }
     }
+
+/*___________________________________________________SIMULATION_INIT__________________________________________________*/
+
+    /**
+     * Initialization of simulation from command-line arguments.
+     * @param args Command-line arguments.
+     * @throws IOException If output file could not be found or created.
+     */
+    private static void simulationInit(String[] args) throws IOException {
+        //Parsing user input
+        parameterCarrier = parseInput(args);
+
+        //Initialize reporter
+        reporter = reporterInit();
+
+        //Initialization of mining site
+
+        //Starting simulation
+        long startTime = System.currentTimeMillis();
+
+        //Ferry init
+        CyclicBarrier ferry = new CyclicBarrier(parameterCarrier.getCapFerry());
+
+        //Mine init
+        InfoLorry infoLorry = new InfoLorry(parameterCarrier.getCapLorry(), parameterCarrier.gettLorry(), ferry);
+        MineDock dock = new MineDock(infoLorry, reporter, startTime);
+
+        activeMine = new Mine(dock);
+
+        //Shift leader init
+        shiftLeader = new Leader(parameterCarrier.getInputFile(), activeMine, new InfoWorkers(parameterCarrier.gettWorker(),
+                parameterCarrier.getcWorker()), reporter, startTime);
+    }
+
+    /**
+     * Method serving to create instance of parameter carrier form command-line arguments.
+     * @param args Command-line arguments.
+     * @return Parameter carrier.
+     */
+    private static ParameterCarrier parseInput(String[] args){
+        return new ParameterCarrier(args);
+    }
+
+    /**
+     * Method serving as initialization of simulation reporter.
+     * @return Reporter.
+     * @throws IOException If output file could not be found or created.
+     */
+    private static Reporter reporterInit() throws IOException {
+        return new Reporter(parameterCarrier.getOutputFile());
+    }
+
 }

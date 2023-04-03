@@ -1,3 +1,9 @@
+/**
+ * Instances of this class represent data transfer object of workers information.
+ * @author Nikol Caltova.
+ * @version 1.0
+ */
+
 public class InfoWorkers {
 /*_________________________________________________CLASS_ATTRIBUTES___________________________________________________*/
 
@@ -15,6 +21,8 @@ public class InfoWorkers {
 
     /**
      * Constructor that creates instance of worker info carrier.
+     * @param workerTime Maximum time it takes worker to mine one field in work block.
+     * @param availableWorkers Number of available workers.
      */
     public InfoWorkers(int workerTime, int availableWorkers) {
 
@@ -22,8 +30,6 @@ public class InfoWorkers {
         this.availableWorkers = availableWorkers;
 
     }
-
-/*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
 /*______________________________________________________GETTERS_______________________________________________________*/
 
@@ -42,6 +48,4 @@ public class InfoWorkers {
     public int getAvailableWorkers() {
         return availableWorkers;
     }
-
-    /*______________________________________________________SETTERS_______________________________________________________*/
 }

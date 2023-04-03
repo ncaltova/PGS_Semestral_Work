@@ -3,8 +3,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class representing shift leader that organizes miners and analyzes mine before mining starts.
+ * Instances of this class represent shift leader that organizes miners and analyzes mine before mining starts.
  * @author Nikol Caltova
+ * @version 1.0
  */
 public class Leader {
 /*_________________________________________________CLASS_ATTRIBUTES___________________________________________________*/
@@ -12,28 +13,42 @@ public class Leader {
     /**
      * Assigned mining site.
      */
-    private Mine assignedMine;
+    private final Mine assignedMine;
 
     /**
      * Mining site map for leader.
      */
-    private String siteMapName;
+    private final String siteMapName;
 
     /**
      * Workers answering to leader.
      */
-    private List<Worker> mineWorkers;
+    private final List<Worker> mineWorkers;
 
-    private InfoWorkers infoWorkers;
+    /**
+     * Information about mine workers.
+     */
+    private final InfoWorkers infoWorkers;
 
-    private Reporter reporter;
-    private long startTime;
+    /**
+     * Reporter for reporting key events.
+     */
+    private final Reporter reporter;
 
-    /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
+    /**
+     * Starting time of the whole simulation.
+     */
+    private final long startTime;
+
+/*___________________________________________________CONSTRUCTORS_____________________________________________________*/
 
     /**
      * Constructor, that creates instance of shift leader that is assigned a mine and name of the site map.
      * @param siteMapName Name of the site map.
+     * @param assignedMine Assigned mining site.
+     * @param infoWorkers Information about mine workers.
+     * @param reporter Reporter for reporting key events.
+     * @param startTime Starting time of the whole simulation.
      */
     public Leader(String siteMapName, Mine assignedMine, InfoWorkers infoWorkers, Reporter reporter, long startTime) {
 
@@ -46,72 +61,97 @@ public class Leader {
 
     }
 
-    /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
+/*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
     /**
      * Method representing shift leader inspecting mining site for mining blocks.
      * @throws FileNotFoundException If site map cannot be found.
      */
     public void inspectMiningSite() throws FileNotFoundException {
-        int mineBlocks = 0;
+        int mineBlocks;
         int mineFields = 0;
 
+        //Inspecting mining site
         this.assignedMine.setWorkBlocks(Parser.parseIntoBlocks(siteMapName));
+
+        //Saving count of work blocks for report
         mineBlocks = this.assignedMine.getWorkBlocks().size();
 
+        //Saving count of total mining fields
         for (WorkBlock workBlock : this.assignedMine.getWorkBlocks()) {
             mineFields += workBlock.getFieldCount();
         }
 
+        //Reporting found information about mining site
         this.reportInspection(mineBlocks, mineFields);
     }
 
-    private void reportInspection(int mineBlocks, int mineFields){
+    /**
+     * Method representing shift organizing workers for mining.
+     * For each work block not already taken leader finds free worker and starts mining process.
+     * If no free worker is found leader stops looking for assignees.
+     */
+    public void organizeWorkers() throws IllegalAccessError{
+        Worker worker;
 
-        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime)  + ", Role: Leader, ThreadID: " +
-                Thread.currentThread().getId() + ", Message: Inspection of mining site done, Mine blocks: " + mineBlocks +
-                ", Mine fields: " + mineFields);
+        for (WorkBlock workBlock: this.assignedMine.getWorkBlocks()){
+            //If work block has already been assigned or mined out
+            if (workBlock.isTaken() || workBlock.isEmpty()) continue;
 
+            //If there is no free worker at the moment
+            if ((worker = this.findWorker()) == null) return;
+
+            //Tag work block as assigned
+            workBlock.takeBlock();
+
+            //Assign work block to free worker
+            worker.giveWork(workBlock);
+
+            //Start mining
+            this.startMining(worker);
+        }
     }
 
     /**
-     * Method representing leader finding free worker in assigned workers.
-     * @return Free worker in assigned workers.
+     * Method representing leader finding free worker in assigned workers,
+     * if no free worker is found and maximum capacity of workers is not reached a new one is created.
+     * @return Free worker.
      */
     private Worker findWorker(){
 
+        //If already existing worker is free return him
         for (Worker worker: this.mineWorkers) {
             if (worker.isDone()) return worker;
         }
 
+        //If no existing worker is free and worker capacity has been met return null
         if (this.mineWorkers.size() == this.infoWorkers.getAvailableWorkers())  return null;
 
+        //Else return new worker
         Worker newWorker = new Worker(this.infoWorkers.getWorkerTime(), this.assignedMine,
                 this.reporter, this.startTime);
 
+        //Add new worker to list of already existing workers under this leader
         this.mineWorkers.add(newWorker);
+        //And return new worker
         return newWorker;
     }
 
-    public void organizeWorkers(){
-        Worker worker;
-        for (WorkBlock workBlock: this.assignedMine.getWorkBlocks()){
-            if (workBlock.isTaken() || workBlock.isEmpty()) continue;
-            if ((worker = this.findWorker()) == null) return;
-
-            workBlock.setTaken(true);
-            worker.setAssignedWorkBlock(workBlock);
-
-            this.startMining(worker);
-            worker.setDone(false);
-        }
-    }
-
-    public void startMining(Worker worker){
+    /**
+     * Method representing leader sending worker to assigned job.
+     * @param worker Worker to be sent.
+     */
+    private void startMining(Worker worker){
         Thread occupiedWorker = new Thread(worker);
         occupiedWorker.start();
     }
 
+/*______________________________________________________GETTERS_______________________________________________________*/
+
+    /**
+     * Getter, returning boolean value indicating if all workers are done with assigned job.
+     * @return True if all workers are done, otherwise false.
+     */
     public boolean allWorkersDone(){
 
         for (Worker worker: this.mineWorkers) {
@@ -121,6 +161,19 @@ public class Leader {
         return true;
     }
 
-/*______________________________________________________GETTERS_______________________________________________________*/
+/*______________________________________________________REPORTS_______________________________________________________*/
+
+    /**
+     * Method for reporting found information about mining site using instance of reporter.
+     * @param mineBlocks Total work blocks count.
+     * @param mineFields Total mining fields count.
+     */
+    private void reportInspection(int mineBlocks, int mineFields){
+
+        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime)  + ", Role: Leader, ThreadID: " +
+                Thread.currentThread().getId() + ", Message: Inspection of mining site done, Mine blocks: " + mineBlocks +
+                ", Mine fields: " + mineFields);
+
+    }
 
 }

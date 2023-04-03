@@ -1,14 +1,20 @@
+/**
+ * Instances of this class represent individual work blocks on mining site.
+ */
 public class WorkBlock {
 
 /*_________________________________________________CLASS_ATTRIBUTES___________________________________________________*/
 
     /** Number of fields in work block */
     private final int fieldCount;
+
     /** Number of fields left in work block */
     private int fieldLeftCount;
+
     /** Boolean indicating whether the work block is empty or not */
     private boolean isEmpty;
 
+    /** Indicator of whether this work block has been assigned or not */
     private boolean isTaken;
 
 /*___________________________________________________CONSTRUCTORS_____________________________________________________*/
@@ -31,9 +37,16 @@ public class WorkBlock {
      * Method that represents mining out one field of work block.
      * Decrements field count and sets isEmpty indicator to the corresponding value.
      */
-    public synchronized void mineField(){
+    public void mineField(){
         this.fieldLeftCount--;
         if (this.fieldLeftCount <= 0) this.isEmpty = true;
+    }
+
+    /**
+     * Method serving to assign this work block.
+     */
+    public void takeBlock(){
+        this.isTaken = true;
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/
@@ -55,11 +68,11 @@ public class WorkBlock {
         return isEmpty;
     }
 
+    /**
+     * Getter that returns indicator of whether this work block has been assigned or not.
+     * @return Indicator of whether this work block has been assigned or not.
+     */
     public boolean isTaken() {
         return isTaken;
-    }
-
-    public void setTaken(boolean taken) {
-        isTaken = taken;
     }
 }

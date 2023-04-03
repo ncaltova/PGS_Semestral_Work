@@ -24,8 +24,10 @@ public class Parser {
         ArrayList<WorkBlock> outputList = new ArrayList<>();
 
         while (fileReader.hasNext()){
+            //Split line by white spaces
             String[] blocks = fileReader.nextLine().split(" ");
 
+            //For each block count number of fields and create instance of WorkBlock
             for (String block : blocks) {
                 WorkBlock newBlock = new WorkBlock(block.length());
                 outputList.add(newBlock);

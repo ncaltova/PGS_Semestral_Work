@@ -41,22 +41,16 @@ public class ParameterCarrier {
 
     /**
      * Constructor that creates instance of simulation parameters carrier.
-     * @param inputFile Name of the input file.
-     * @param outputFile Name of the output file.
-     * @param cWorker Maximum number of simultaneously working workers.
-     * @param tWorker Time it takes worker to mine one field.
-     * @param capLorry Maximum number of fields a lorry can handle.
-     * @param tLorry Maximum time it takes lorry to get to ferry and from ferry to final destination.
-     * @param capFerry Maximum number of lorries a ferry can handle.
+     * @param args Command-line arguments.
      */
-    public ParameterCarrier(String inputFile, String outputFile, int cWorker, int tWorker, int capLorry, int tLorry, int capFerry) {
-        this.inputFile = inputFile;
-        this.outputFile = outputFile;
-        this.cWorker = cWorker;
-        this.tWorker = tWorker;
-        this.capLorry = capLorry;
-        this.tLorry = tLorry;
-        this.capFerry = capFerry;
+    public ParameterCarrier(String[] args) {
+        this.inputFile = args[1];
+        this.outputFile = args[3];
+        this.cWorker = Integer.parseInt(args[5]);
+        this.tWorker = Integer.parseInt(args[7]);
+        this.capLorry = Integer.parseInt(args[9]);
+        this.tLorry = Integer.parseInt(args[11]);
+        this.capFerry = Integer.parseInt(args[13]);
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/
