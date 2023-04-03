@@ -89,10 +89,11 @@ public class Lorry implements Runnable{
     public void run() throws IllegalThreadStateException{
 
         try {
-
+            this.isDone = false;
             this.reportLoaded(System.currentTimeMillis() - this.timeCreated);
             this.goToFerry();
             this.goToFinish();
+            this.isDone = true;
 
         } catch (BrokenBarrierException e) {
 
@@ -131,8 +132,6 @@ public class Lorry implements Runnable{
 
         //Lorry reporting reaching the final destination.
         this.reportFinish(finishTime);
-
-        this.isDone = true;
     }
 
     /**

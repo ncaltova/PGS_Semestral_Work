@@ -133,6 +133,7 @@ public class Leader {
 
         //Add new worker to list of already existing workers under this leader
         this.mineWorkers.add(newWorker);
+
         //And return new worker
         return newWorker;
     }

@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * Instances of this class represent dock for lorries that takes care of lorry traffic.
  * @author Nikol Caltova
@@ -22,6 +24,11 @@ public class MineDock {
     private final Reporter reporter;
 
     /**
+     * List of all dispatched lorries
+     */
+    private final ArrayList<Lorry> dispatchedLorries;
+
+    /**
      * Starting time of the whole simulation.
      */
     private final long startTime;
@@ -42,6 +49,7 @@ public class MineDock {
         this.startTime = startTime;
         this.currentLorry = new Lorry(infoLorry.getLorryCapacity(), infoLorry.getLorryTime(),
                 infoLorry.getAssignedFerry(), reporter, startTime);
+        this.dispatchedLorries = new ArrayList<>();
     }
 
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
@@ -52,6 +60,7 @@ public class MineDock {
     public synchronized void dispatchLorry(){
         if (!this.currentLorry.isFull()) return;
 
+        //Adding lorry to the list of dipatched lorries
         this.dispatch();
 
         this.currentLorry = new Lorry(this.infoLorry.getLorryCapacity(), this.infoLorry.getLorryTime(),
@@ -78,9 +87,10 @@ public class MineDock {
 
         try {
             dispatchedLorry.start();
+            this.dispatchedLorries.add(currentLorry);
         }
         catch (IllegalThreadStateException e) {
-            dispatchedLorry.start();
+            this.dispatch();
         }
 
     }
@@ -95,18 +105,21 @@ public class MineDock {
 /*______________________________________________________GETTERS_______________________________________________________*/
 
     /**
-     * Getter that returns indicator of whether current lorry is done with its work.
-     * @return indicator of whether current lorry is done with its work.
-     */
-    public boolean isLorryDone(){
-        return this.currentLorry.isDone();
-    }
-
-    /**
      * Getter that returns indicator of whether current lorry is full or not.
      * @return indicator of whether current lorry is full or not.
      */
     public synchronized boolean isLorryFull(){
         return this.currentLorry.isFull();
+    }
+
+    /**
+     * Getter that returns indicator of whether all lorries are done with their work.
+     * @return indicator of whether all lorries are done with their work.
+     */
+    public boolean areLorriesDone(){
+        for (Lorry lorry: this.dispatchedLorries) {
+            if (!lorry.isDone()) return false;
+        }
+        return true;
     }
 }

@@ -33,28 +33,19 @@ public class Mine {
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
     /**
-     * Method representing dispatching current lorry to ferry by worker.
-     */
-    public synchronized void dispatchLorry(){
-        this.dock.dispatchLorry();
-    }
-
-    /**
      * Method serving for dispatching last lorry by simulation admin.
-     * @return True if last lorry has been partially loaded and dispatched else false.
      */
-    public boolean dispatchLastLorry(){
-        return this.dock.dispatchLastLorry();
+    public void dispatchLastLorry(){
+        this.dock.dispatchLastLorry();
     }
 
     /**
      * Method representing loading current lorry with one minefield.
-     * @return False if current lorry is fully loaded and cant take any other cargo else true.
      */
-    public synchronized boolean loadLorry(){
+    public synchronized void loadLorry(){
         this.dock.loadLorry();
 
-        return !this.dock.isLorryFull();
+        if (this.dock.isLorryFull()) this.dock.dispatchLorry();
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/
@@ -83,15 +74,11 @@ public class Mine {
     }
 
     /**
-     * Getter that returns indicator of whether current lorry is done with its work.
-     * @return indicator of whether current lorry is done with its work.
+     * Getter that returns indicator of whether all lorries are done with their work.
+     * @return indicator of whether all lorries are done with their work.
      */
-    public boolean isLorryDone(){
-        return this.dock.isLorryDone();
-    }
-
-    public synchronized MineDock getDock() {
-        return dock;
+    public boolean areLorriesDone(){
+        return this.dock.areLorriesDone();
     }
 
     /*______________________________________________________SETTERS_______________________________________________________*/

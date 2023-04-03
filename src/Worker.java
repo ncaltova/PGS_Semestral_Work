@@ -115,9 +115,7 @@ public class Worker implements Runnable{
         while (this.minedMaterial > 0){
 
             //If current lorry is full, set it to ferry
-            if (!assignedMine.loadLorry()){
-                assignedMine.dispatchLorry();
-            }
+            assignedMine.loadLorry();
 
            //Load one piece of mined material
            this.minedMaterial--;
