@@ -52,10 +52,9 @@ public class Mine {
      * @return False if current lorry is fully loaded and cant take any other cargo else true.
      */
     public synchronized boolean loadLorry(){
-        if (this.dock.isLorryFull()) return false;
-
         this.dock.loadLorry();
-        return true;
+
+        return !this.dock.isLorryFull();
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/
@@ -91,15 +90,11 @@ public class Mine {
         return this.dock.isLorryDone();
     }
 
-    /**
-     * Getter that returns indicator of whether current lorry is full or not.
-     * @return Indicator of whether current lorry is full or not.
-     */
-    public boolean isLorryFull(){
-        return this.dock.isLorryFull();
+    public synchronized MineDock getDock() {
+        return dock;
     }
 
-/*______________________________________________________SETTERS_______________________________________________________*/
+    /*______________________________________________________SETTERS_______________________________________________________*/
 
     /**
      * Setter, that sets list of found working blocks.

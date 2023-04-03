@@ -113,14 +113,16 @@ public class Worker implements Runnable{
     public void load() {
 
         while (this.minedMaterial > 0){
-            if (assignedMine.isLorryFull()) continue;
+
+            //If current lorry is full, set it to ferry
+            if (!assignedMine.loadLorry()){
+                assignedMine.dispatchLorry();
+            }
 
            //Load one piece of mined material
            this.minedMaterial--;
            SandMan.waitFor(10);
 
-           //If current lorry is full, set it to ferry
-           if (!assignedMine.loadLorry()) assignedMine.dispatchLorry();
         }
 
     }
@@ -142,7 +144,7 @@ public class Worker implements Runnable{
      */
     public int generateTime() {
         Random rd = new Random();
-        return (rd.nextInt(this.workerTime) + 1)*1000;
+        return (rd.nextInt(this.workerTime) + 1);
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/

@@ -25,7 +25,7 @@ public class Lorry implements Runnable{
     /**
      * Indicator if lorry is fully loaded.
      */
-    private boolean isFull;
+    private volatile boolean isFull;
 
     /**
      * Assigned dock with waiting ferry.
@@ -175,7 +175,7 @@ public class Lorry implements Runnable{
     /**
      * Method representing loading lorry with mined material.
      */
-    public void load(){
+    public synchronized void load(){
         this.currentCapacity--;
         this.isLoaded = true;
         if (this.currentCapacity == 0) this.isFull = true;
@@ -212,7 +212,7 @@ public class Lorry implements Runnable{
      * Getter that returns indicator if lorry is fully loaded.
      * @return Indicator if lorry is fully loaded.
      */
-    public boolean isFull() {
+    public synchronized boolean isFull() {
         return isFull;
     }
 

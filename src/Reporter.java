@@ -36,7 +36,7 @@ public class Reporter {
      */
     public synchronized void report(String log) {
         try {
-            this.fileWriter.write(log);
+            this.fileWriter.write(log + "\n");
         } catch (IOException e) {
             System.out.println("Reporting to output file has failed, exiting program ...");
             throw new RuntimeException(e);

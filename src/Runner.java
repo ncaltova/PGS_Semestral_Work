@@ -30,6 +30,8 @@ public class Runner {
      */
     private static Mine activeMine;
 
+    private static final int WAIT_TIME = 100;
+
 /*___________________________________________________MAIN_METHOD______________________________________________________*/
 
     /**
@@ -72,13 +74,13 @@ public class Runner {
 
         //While all workers are not done wait
         while (!shiftLeader.allWorkersDone()){
-            SandMan.waitFor(10);
+            SandMan.waitFor(WAIT_TIME);
         }
 
         //Dispatching partially loaded lorry if it is needed.
         if (activeMine.dispatchLastLorry()){
             while (!activeMine.isLorryDone()){
-                SandMan.waitFor(10);
+                SandMan.waitFor(WAIT_TIME);
             }
         }
     }

@@ -9,7 +9,7 @@ public class MineDock {
     /**
      * Current lorry waiting in the dock to be loaded.
      */
-    private Lorry currentLorry;
+    private volatile Lorry currentLorry;
 
     /**
      * Information about lorries.
@@ -49,7 +49,7 @@ public class MineDock {
     /**
      * Method serving for dispatching full lorries by workers during simulation.
      */
-    public void dispatchLorry(){
+    public synchronized void dispatchLorry(){
         if (!this.currentLorry.isFull()) return;
 
         this.dispatch();
@@ -72,7 +72,7 @@ public class MineDock {
     /**
      * Method serving for dispatching current lorry.
      */
-    private void dispatch() {
+    private synchronized void dispatch() {
 
         Thread dispatchedLorry = new Thread(this.currentLorry);
 
@@ -88,7 +88,7 @@ public class MineDock {
     /**
      * Method representing loading current lorry with one minefield.
      */
-    public void loadLorry(){
+    public synchronized void loadLorry(){
         this.currentLorry.load();
     }
 
@@ -106,7 +106,7 @@ public class MineDock {
      * Getter that returns indicator of whether current lorry is full or not.
      * @return indicator of whether current lorry is full or not.
      */
-    public boolean isLorryFull(){
+    public synchronized boolean isLorryFull(){
         return this.currentLorry.isFull();
     }
 }
