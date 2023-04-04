@@ -31,6 +31,11 @@ public class Runner {
     private static Mine activeMine;
 
     /**
+     * Starting time of simulation
+     */
+    private static long startTime;
+
+    /**
      * Wait time for main thread.
      */
     private static final int WAIT_TIME = 10;
@@ -81,6 +86,9 @@ public class Runner {
             SandMan.waitFor(WAIT_TIME);
         }
 
+        //Reporting total mined fields
+        shiftLeader.reportWorkers();
+
         //Dispatching partially loaded lorry if it is needed.
         activeMine.dispatchLastLorry();
 
@@ -88,6 +96,9 @@ public class Runner {
         while (!activeMine.areLorriesDone()){
             SandMan.waitFor(WAIT_TIME);
         }
+
+        //Reporting total dispatched material
+        activeMine.reportTotalDispatched();
     }
 
 /*___________________________________________________SIMULATION_INIT__________________________________________________*/
@@ -104,10 +115,13 @@ public class Runner {
         //Initialize reporter
         reporter = reporterInit();
 
-        //Initialization of mining site
-
         //Starting simulation
-        long startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
+
+        //Reporting loaded parameters
+        reportParameters();
+
+        //Initialization of mining site
 
         //Ferry init
         CyclicBarrier ferry = new CyclicBarrier(parameterCarrier.getCapFerry());
@@ -139,6 +153,23 @@ public class Runner {
      */
     private static Reporter reporterInit() throws IOException {
         return new Reporter(parameterCarrier.getOutputFile());
+    }
+
+/*___________________________________________________SIMULATION_INIT__________________________________________________*/
+
+    /**
+     * Method serving as reporter of loaded command-line parameters.
+     */
+    private static void reportParameters(){
+        reporter.reportToConsole("Time: " + (System.currentTimeMillis() - startTime) + ", Role: Runner, "+
+        "Message: Command-line parameters loaded\n" +
+        "Input file: "+parameterCarrier.getInputFile()+"\n"+
+        "Output file: "+parameterCarrier.getOutputFile()+"\n"+
+        "Maximum worker count: "+parameterCarrier.getcWorker()+"\n"+
+        "Maximum worker time: "+parameterCarrier.gettWorker()+"\n"+
+        "Maximum lorry capacity: "+parameterCarrier.getCapLorry()+"\n"+
+        "Maximum lorry time: "+parameterCarrier.gettLorry()+"\n"+
+        "Maximum ferry capacity: "+parameterCarrier.getCapFerry()+"\n");
     }
 
 }

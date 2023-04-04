@@ -12,6 +12,11 @@ public class Lorry implements Runnable{
 /*_________________________________________________CLASS_ATTRIBUTES___________________________________________________*/
 
     /**
+     * Lorry capacity.
+     */
+    private int lorryCapacity;
+
+    /**
      * Current capacity of lorry.
      */
     private volatile int currentCapacity;
@@ -67,6 +72,7 @@ public class Lorry implements Runnable{
      */
     public Lorry(int lorryCapacity, int lorryTime, CyclicBarrier assignedFerry, Reporter reporter, long startTime) {
 
+        this.lorryCapacity = lorryCapacity;
         this.currentCapacity = lorryCapacity;
         this.lorryTime = lorryTime;
         this.isFull = false;
@@ -98,7 +104,7 @@ public class Lorry implements Runnable{
         } catch (BrokenBarrierException e) {
 
             System.out.println("Barrier has been broken during its work, trying to resolve issue...");
-            assignedFerry.reset();
+            if (assignedFerry.isBroken()) assignedFerry.reset();
 
             //Passing message of broken barrier to others.
             throw new IllegalThreadStateException();
@@ -167,6 +173,9 @@ public class Lorry implements Runnable{
         //Lorry getting on ferry.
         this.assignedFerry.await();
 
+        reporter.reportToConsole("Time: " + (System.currentTimeMillis() - this.startTime)  + ", Role: Ferry, ThreadID: undef"+
+                 ", Message: Ferry dispatched");
+
         //If indicator is set to true report the transfer of loaded lorries by ferry.
         if (firstOnFerry) reportFerryDepart(System.currentTimeMillis() - ferryStartTime);
     }
@@ -211,7 +220,7 @@ public class Lorry implements Runnable{
      * Getter that returns indicator if lorry is fully loaded.
      * @return Indicator if lorry is fully loaded.
      */
-    public synchronized boolean isFull() {
+    public boolean isFull() {
         return isFull;
     }
 
@@ -231,6 +240,14 @@ public class Lorry implements Runnable{
         return isLoaded;
     }
 
+    /**
+     * Getter that returns maximum capacity of lorry.
+     * @return maximum capacity of lorry.
+     */
+    public int getLorryCapacity() {
+        return lorryCapacity;
+    }
+
     /*______________________________________________________REPORTS_______________________________________________________*/
 
     /**
@@ -238,7 +255,7 @@ public class Lorry implements Runnable{
      * @param timeElapsed Time it took to fully load this lorry.
      */
     private void reportLoaded(long timeElapsed) {
-        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Lorry, ThreadID: " +
+        this.reporter.reportToFile("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Lorry, ThreadID: " +
                 Thread.currentThread().getId() + ", Message: Current lorry has been fully loaded," +
                 " Time elapsed: "+ timeElapsed);
     }
@@ -248,7 +265,7 @@ public class Lorry implements Runnable{
      * @param timeElapsed Time it took this lorry to reach ferry.
      */
     private void reportFerry(long timeElapsed) {
-        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Lorry, ThreadID: " +
+        this.reporter.reportToFile("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Lorry, ThreadID: " +
                 Thread.currentThread().getId() + ", Message: Lorry successfully reached ferry," +
                 " Time elapsed: "+ timeElapsed);
     }
@@ -258,7 +275,7 @@ public class Lorry implements Runnable{
      * @param timeElapsed Time it took this lorry to reach finish.
      */
     private void reportFinish(long timeElapsed) {
-        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Lorry, ThreadID: " +
+        this.reporter.reportToFile("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Lorry, ThreadID: " +
                 Thread.currentThread().getId() + ", Message: Lorry successfully reached its finish," +
                 " Time elapsed: "+ timeElapsed);
     }
@@ -268,7 +285,7 @@ public class Lorry implements Runnable{
      * @param timeElapsed Time it took ferry to fully load.
      */
     private void reportFerryDepart(long timeElapsed) {
-        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Ferry, ThreadID: undef," +
+        this.reporter.reportToFile("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Ferry, ThreadID: undef," +
                 " Message: Ferry has departed, Time elapsed: "+ timeElapsed);
     }
 }

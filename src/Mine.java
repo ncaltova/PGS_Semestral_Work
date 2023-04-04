@@ -48,6 +48,13 @@ public class Mine {
         if (this.dock.isLorryFull()) this.dock.dispatchLorry();
     }
 
+    /**
+     * Method representing report of total dispatched material.
+     */
+    public void reportTotalDispatched(){
+        this.dock.reportTotalDispatched();
+    }
+
 /*______________________________________________________GETTERS_______________________________________________________*/
 
     /**

@@ -35,6 +35,11 @@ public class Worker implements Runnable{
     private int minedMaterial;
 
     /**
+     * Number of total mined material.
+     */
+    private int allMinedMaterial;
+
+    /**
      * Instance of state reporter.
      */
     private final Reporter reporter;
@@ -62,6 +67,7 @@ public class Worker implements Runnable{
         this.reporter = reporter;
         this.startTime = startTime;
         this.isDone = true;
+        this.allMinedMaterial = 0;
 
     }
 /*____________________________________________________METHOD_RUN______________________________________________________*/
@@ -74,6 +80,8 @@ public class Worker implements Runnable{
         this.minedMaterial = 0;
 
         this.mine();
+        this.allMinedMaterial += this.minedMaterial;
+
         this.load();
 
         this.isDone = true;
@@ -119,7 +127,7 @@ public class Worker implements Runnable{
 
            //Load one piece of mined material
            this.minedMaterial--;
-           SandMan.waitFor(10);
+           SandMan.waitFor(1000);
 
         }
 
@@ -155,14 +163,22 @@ public class Worker implements Runnable{
         return isDone;
     }
 
-/*______________________________________________________REPORTS_______________________________________________________*/
+    /**
+     * Getter that returns total number of mined fields.
+     * @return Total number of mined fields.
+     */
+    public int getAllMinedMaterial() {
+        return allMinedMaterial;
+    }
+
+    /*______________________________________________________REPORTS_______________________________________________________*/
 
     /**
      * Method serving to report the event of mining out one field out of assigned work block.
      * @param timeElapsed Time it took to mine out said field.
      */
     private void reportMinedField(long timeElapsed){
-        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Worker, ThreadID: " +
+        this.reporter.reportToFile("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Worker, ThreadID: " +
                 Thread.currentThread().getId() + ", Message: One field form assigned block successfully mined," +
                 " Time elapsed: "+ timeElapsed);
     }
@@ -172,7 +188,7 @@ public class Worker implements Runnable{
      * @param timeElapsed Time it took to mine out assigned work block.
      */
     private void reportMinedBlock(long timeElapsed){
-        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Worker, ThreadID: " +
+        this.reporter.reportToFile("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Worker, ThreadID: " +
                 Thread.currentThread().getId() + ", Message: Assigned work block successfully mined," +
                 " Time elapsed: "+ timeElapsed);
     }

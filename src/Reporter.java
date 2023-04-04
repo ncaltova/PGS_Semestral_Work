@@ -31,16 +31,25 @@ public class Reporter {
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
     /**
-     * Method serving for reporting key events to given output file and stdout.
+     * Method serving for reporting key events to given output file.
      * @param log Log to report.
      */
-    public synchronized void report(String log) {
+    public synchronized void reportToFile(String log) {
+
         try {
             this.fileWriter.write(log + "\n");
         } catch (IOException e) {
             System.out.println("Reporting to output file has failed, exiting program ...");
             throw new RuntimeException(e);
         }
+
+    }
+
+    /**
+     * Method serving for reporting key events to stdout.
+     * @param log Log to report.
+     */
+    public synchronized void reportToConsole(String log) {
         System.out.println(log);
     }
 

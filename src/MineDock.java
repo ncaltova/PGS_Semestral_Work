@@ -29,6 +29,11 @@ public class MineDock {
     private final ArrayList<Lorry> dispatchedLorries;
 
     /**
+     * Number of all dispatched material.
+     */
+    private int allDispatchedMaterial;
+
+    /**
      * Starting time of the whole simulation.
      */
     private final long startTime;
@@ -87,6 +92,7 @@ public class MineDock {
 
         try {
             dispatchedLorry.start();
+            this.allDispatchedMaterial += this.currentLorry.getLorryCapacity();
             this.dispatchedLorries.add(currentLorry);
         }
         catch (IllegalThreadStateException e) {
@@ -102,13 +108,14 @@ public class MineDock {
         this.currentLorry.load();
     }
 
+
 /*______________________________________________________GETTERS_______________________________________________________*/
 
     /**
      * Getter that returns indicator of whether current lorry is full or not.
      * @return indicator of whether current lorry is full or not.
      */
-    public synchronized boolean isLorryFull(){
+    public boolean isLorryFull(){
         return this.currentLorry.isFull();
     }
 
@@ -122,4 +129,15 @@ public class MineDock {
         }
         return true;
     }
+
+/*______________________________________________________REPORTERS_______________________________________________________*/
+
+    /**
+     * Method that reports total dispatched material by this dock.
+     */
+    public void reportTotalDispatched(){
+        this.reporter.reportToFile("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Dock, ThreadID: undef," +
+                " Message: Total dispatched fields: "+this.allDispatchedMaterial);
+    }
+
 }

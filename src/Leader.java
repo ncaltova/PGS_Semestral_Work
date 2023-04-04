@@ -147,6 +147,19 @@ public class Leader {
         occupiedWorker.start();
     }
 
+    /**
+     * Method serving as reporter of total mined material at the end of simulation.
+     */
+    public void reportWorkers(){
+        int i = 0;
+
+        for ( Worker worker : this.mineWorkers) {
+            this.reportTotalMined(worker.getAllMinedMaterial(), i);
+            i++;
+        }
+
+    }
+
 /*______________________________________________________GETTERS_______________________________________________________*/
 
     /**
@@ -171,9 +184,21 @@ public class Leader {
      */
     private void reportInspection(int mineBlocks, int mineFields){
 
-        this.reporter.report("Time: " + (System.currentTimeMillis() - this.startTime)  + ", Role: Leader, ThreadID: " +
-                Thread.currentThread().getId() + ", Message: Inspection of mining site done, Mine blocks: " + mineBlocks +
+        this.reporter.reportToFile("Time: " + (System.currentTimeMillis() - this.startTime)  + ", Role: Leader, ThreadID: undef," +
+                " Message: Inspection of mining site done, Mine blocks: " + mineBlocks +
                 ", Mine fields: " + mineFields);
+
+    }
+
+    /**
+     * Method for reporting found information about mining site using instance of reporter.
+     * @param mineBlocks Total work blocks count.
+     * @param workerId ID of current worker.
+     */
+    private void reportTotalMined(int mineBlocks, int workerId){
+
+        this.reporter.reportToConsole("Time: " + (System.currentTimeMillis() - this.startTime)  + ", Role: Leader, ThreadID: undef," +
+                " Message: Total mined fields by worker: " + mineBlocks + ", WorkerID: "+ workerId);
 
     }
 
