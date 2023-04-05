@@ -1,6 +1,8 @@
 import java.util.Random;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Instances of this class represent lorry waiting to be loaded at mine and taking the cargo to final destination.
@@ -97,6 +99,8 @@ public class Lorry implements Runnable{
         try {
             this.isDone = false;
             this.reportLoaded(System.currentTimeMillis() - this.timeCreated);
+            System.out.println("Role: Lorry, ThreadId: "+Thread.currentThread().getId()+", Message: Im fully loaded, " +
+                    "Capacity: "+this.currentCapacity);
             this.goToFerry();
             this.goToFinish();
             this.isDone = true;
@@ -119,7 +123,12 @@ public class Lorry implements Runnable{
             //Passing message of interruption to others.
             throw new IllegalThreadStateException();
 
+        } catch (TimeoutException e) {
+            //If barrier times out ending thread
+            System.out.println("Ferry waited too long to be fully loaded, sending loaded lorries away...");
+            this.isDone = true;
         }
+
 
     }
 
@@ -146,7 +155,7 @@ public class Lorry implements Runnable{
      * @throws InterruptedException If lorry is interrupted during its waiting on ferry.
      * @throws BrokenBarrierException If ferry is broken during the wait of all lorries.
      */
-    private void goToFerry() throws InterruptedException, BrokenBarrierException {
+    private void goToFerry() throws InterruptedException, BrokenBarrierException, TimeoutException {
 
         //Time it will take this lorry to go to the ferry.
         long ferryTime = this.generateFerryTime();
@@ -171,13 +180,14 @@ public class Lorry implements Runnable{
         }
 
         //Lorry getting on ferry.
-        this.assignedFerry.await();
-
-        reporter.reportToConsole("Time: " + (System.currentTimeMillis() - this.startTime)  + ", Role: Ferry, ThreadID: undef"+
-                 ", Message: Ferry dispatched");
+        this.assignedFerry.await(15, TimeUnit.SECONDS);
 
         //If indicator is set to true report the transfer of loaded lorries by ferry.
-        if (firstOnFerry) reportFerryDepart(System.currentTimeMillis() - ferryStartTime);
+        if (firstOnFerry){
+            reportFerryDepart(System.currentTimeMillis() - ferryStartTime);
+            reporter.reportToConsole("Time: " + (System.currentTimeMillis() - this.startTime)  + ", Role: Ferry, ThreadID: undef"+
+                    ", Message: Ferry dispatched");
+        }
     }
 
     /**

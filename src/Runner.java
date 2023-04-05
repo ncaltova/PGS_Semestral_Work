@@ -89,15 +89,13 @@ public class Runner {
         //Reporting total mined fields
         shiftLeader.reportWorkers();
 
-        //Dispatching partially loaded lorry if it is needed.
-        activeMine.dispatchLastLorry();
-
         //Wait until all lorries are done working
         while (!activeMine.areLorriesDone()){
             SandMan.waitFor(WAIT_TIME);
         }
 
         //Reporting total dispatched material
+        activeMine.countAllDispatched();
         activeMine.reportTotalDispatched();
     }
 

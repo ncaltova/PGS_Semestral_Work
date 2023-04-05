@@ -33,13 +33,6 @@ public class Mine {
 /*_________________________________________________INSTANCE_METHODS___________________________________________________*/
 
     /**
-     * Method serving for dispatching last lorry by simulation admin.
-     */
-    public void dispatchLastLorry(){
-        this.dock.dispatchLastLorry();
-    }
-
-    /**
      * Method representing loading current lorry with one minefield.
      */
     public synchronized void loadLorry(){
@@ -53,6 +46,13 @@ public class Mine {
      */
     public void reportTotalDispatched(){
         this.dock.reportTotalDispatched();
+    }
+
+    /**
+     * Method that counts all dispatched material.
+     */
+    public void countAllDispatched(){
+        this.dock.countAllDispatched();
     }
 
 /*______________________________________________________GETTERS_______________________________________________________*/

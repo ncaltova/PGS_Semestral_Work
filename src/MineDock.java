@@ -73,17 +73,6 @@ public class MineDock {
     }
 
     /**
-     * Method serving for dispatching last lorry by simulation admin.
-     * @return True if last lorry has been partially loaded and dispatched else false.
-     */
-    public boolean dispatchLastLorry(){
-        if (!this.currentLorry.isLoaded()) return false;
-
-        this.dispatch();
-        return true;
-    }
-
-    /**
      * Method serving for dispatching current lorry.
      */
     private synchronized void dispatch() {
@@ -92,7 +81,6 @@ public class MineDock {
 
         try {
             dispatchedLorry.start();
-            this.allDispatchedMaterial += this.currentLorry.getLorryCapacity();
             this.dispatchedLorries.add(currentLorry);
         }
         catch (IllegalThreadStateException e) {
@@ -106,6 +94,15 @@ public class MineDock {
      */
     public synchronized void loadLorry(){
         this.currentLorry.load();
+    }
+
+    /**
+     * Method that counts all dispatched material.
+     */
+    public void countAllDispatched(){
+        for (Lorry lorry: this.dispatchedLorries) {
+            if (lorry.isDone()) this.allDispatchedMaterial += lorry.getLorryCapacity();
+        }
     }
 
 
@@ -136,7 +133,7 @@ public class MineDock {
      * Method that reports total dispatched material by this dock.
      */
     public void reportTotalDispatched(){
-        this.reporter.reportToFile("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Dock, ThreadID: undef," +
+        this.reporter.reportToConsole("Time: " + (System.currentTimeMillis() - this.startTime) + ", Role: Dock, ThreadID: undef," +
                 " Message: Total dispatched fields: "+this.allDispatchedMaterial);
     }
 

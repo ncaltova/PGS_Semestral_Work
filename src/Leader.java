@@ -184,9 +184,12 @@ public class Leader {
      */
     private void reportInspection(int mineBlocks, int mineFields){
 
-        this.reporter.reportToFile("Time: " + (System.currentTimeMillis() - this.startTime)  + ", Role: Leader, ThreadID: undef," +
+        String log = "Time: " + (System.currentTimeMillis() - this.startTime)  + ", Role: Leader, ThreadID: undef," +
                 " Message: Inspection of mining site done, Mine blocks: " + mineBlocks +
-                ", Mine fields: " + mineFields);
+                ", Mine fields: " + mineFields;
+
+        this.reporter.reportToFile(log);
+        this.reporter.reportToConsole(log);
 
     }
 
